@@ -1,0 +1,51 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="using:CorePlay.Views.CustomControls"
+					xmlns:models="clr-namespace:CorePlay.Models"
+                    xmlns:local="clr-namespace:CorePlay.Converters">
+
+	<!-- Register converters -->
+	<local:ImageVisibilityConverter x:Key="ImageVisibilityConverter"/>
+	<local:TextVisibilityConverter x:Key="TextVisibilityConverter"/>
+
+	<Design.PreviewWith>
+		<StackPanel Width="400" Spacing="10">
+			<StackPanel Background="{DynamicResource SystemRegionBrush}">
+				<controls:ImageGrid />
+			</StackPanel>
+		</StackPanel>
+	</Design.PreviewWith>
+
+	<ControlTheme x:Key="{x:Type controls:ImageGrid}" TargetType="controls:ImageGrid">
+		<Setter Property="Template">
+			<ControlTemplate>
+				<ListBox ItemsSource="{TemplateBinding Items}" Background="Transparent" Margin="0 20">
+					<ListBox.ItemsPanel>
+						<ItemsPanelTemplate x:DataType="models:ImageGridItem">
+							<WrapPanel>
+								<StackPanel>
+									<Image Source="{Binding ImageSource}" Width="100" Height="100">
+										<Image.IsVisible>
+											<MultiBinding Converter="{StaticResource ImageVisibilityConverter}">
+												<Binding Path="ImageSource"/>
+												<Binding Path="FallbackText"/>
+											</MultiBinding>
+										</Image.IsVisible>
+									</Image>
+									<TextBlock Text="{Binding FallbackText}">
+										<TextBlock.IsVisible>
+											<MultiBinding Converter="{StaticResource TextVisibilityConverter}">
+												<Binding Path="ImageSource"/>
+												<Binding Path="FallbackText"/>
+											</MultiBinding>
+										</TextBlock.IsVisible>
+									</TextBlock>
+								</StackPanel>
+							</WrapPanel>
+						</ItemsPanelTemplate>
+					</ListBox.ItemsPanel>
+				</ListBox>
+			</ControlTemplate>
+		</Setter>
+	</ControlTheme>
+</ResourceDictionary>
