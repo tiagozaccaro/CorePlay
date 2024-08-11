@@ -10,7 +10,7 @@
         Title="CorePlay"
 		TransparencyLevelHint="AcrylicBlur"
         Background="Transparent"
-		ExtendClientAreaToDecorationsHint="True">
+        ExtendClientAreaToDecorationsHint="True">
 	<Panel>
 		<ExperimentalAcrylicBorder IsHitTestVisible="False">
 			<ExperimentalAcrylicBorder.Material>

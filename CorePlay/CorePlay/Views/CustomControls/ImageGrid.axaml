@@ -1,51 +1,87 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:controls="using:CorePlay.Views.CustomControls"
-					xmlns:models="clr-namespace:CorePlay.Models"
-                    xmlns:local="clr-namespace:CorePlay.Converters">
+                    xmlns:models="clr-namespace:CorePlay.Models"
+                    xmlns:local="clr-namespace:CorePlay.Converters"
+                    xmlns:asyncImageLoader="clr-namespace:AsyncImageLoader;assembly=AsyncImageLoader.Avalonia">
 
-	<!-- Register converters -->
-	<local:ImageVisibilityConverter x:Key="ImageVisibilityConverter"/>
-	<local:TextVisibilityConverter x:Key="TextVisibilityConverter"/>
+    <!-- Register converters -->
+    <local:ImageVisibilityConverter x:Key="ImageVisibilityConverter"/>
+    <local:TextVisibilityConverter x:Key="TextVisibilityConverter"/>
+    <local:SelectedItemConverter x:Key="SelectedItemConverter"/>
 
-	<Design.PreviewWith>
-		<StackPanel Width="400" Spacing="10">
-			<StackPanel Background="{DynamicResource SystemRegionBrush}">
-				<controls:ImageGrid />
-			</StackPanel>
-		</StackPanel>
-	</Design.PreviewWith>
+    <Design.PreviewWith>
+        <StackPanel Width="400" Spacing="10">
+            <StackPanel Background="{DynamicResource SystemRegionBrush}">
+                <controls:ImageGrid />
+            </StackPanel>
+        </StackPanel>
+    </Design.PreviewWith>
 
-	<ControlTheme x:Key="{x:Type controls:ImageGrid}" TargetType="controls:ImageGrid">
-		<Setter Property="Template">
-			<ControlTemplate>
-				<ListBox ItemsSource="{TemplateBinding Items}" Background="Transparent" Margin="0 20">
-					<ListBox.ItemsPanel>
-						<ItemsPanelTemplate x:DataType="models:ImageGridItem">
-							<WrapPanel>
-								<StackPanel>
-									<Image Source="{Binding ImageSource}" Width="100" Height="100">
-										<Image.IsVisible>
-											<MultiBinding Converter="{StaticResource ImageVisibilityConverter}">
-												<Binding Path="ImageSource"/>
-												<Binding Path="FallbackText"/>
-											</MultiBinding>
-										</Image.IsVisible>
-									</Image>
-									<TextBlock Text="{Binding FallbackText}">
-										<TextBlock.IsVisible>
-											<MultiBinding Converter="{StaticResource TextVisibilityConverter}">
-												<Binding Path="ImageSource"/>
-												<Binding Path="FallbackText"/>
-											</MultiBinding>
-										</TextBlock.IsVisible>
-									</TextBlock>
-								</StackPanel>
-							</WrapPanel>
-						</ItemsPanelTemplate>
-					</ListBox.ItemsPanel>
-				</ListBox>
-			</ControlTemplate>
-		</Setter>
-	</ControlTheme>
+    <ControlTheme x:Key="{x:Type controls:ImageGrid}" TargetType="controls:ImageGrid">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <ScrollViewer VerticalScrollBarVisibility="Hidden">
+                        <ItemsControl x:Name="PART_ItemsControl"
+                                        ItemsSource="{TemplateBinding Items}"
+                                        Background="Transparent" Margin="0 20">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="models:ImageGridItem">
+                                    <Border
+                                        BorderThickness="4"
+                                        CornerRadius="10"
+                                        Background="Transparent"
+                                        IsHitTestVisible="True"
+                                        Margin="4"
+                                        Focusable="True">
+                                        <Border.BorderBrush>
+                                            <MultiBinding Converter="{StaticResource SelectedItemConverter}">
+                                                <Binding RelativeSource="{RelativeSource AncestorType=controls:ImageGrid}" Path="SelectedItem" />
+                                                <Binding Path="." />
+                                            </MultiBinding>
+                                        </Border.BorderBrush>
+                                        <StackPanel>
+                                            <Image
+                                                asyncImageLoader:ImageLoader.Source="{Binding ImageSource}"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Width="{Binding RelativeSource={RelativeSource AncestorType=controls:ImageGrid}, Path=ImageSize.Width}"
+                                                Height="{Binding RelativeSource={RelativeSource AncestorType=controls:ImageGrid}, Path=ImageSize.Height}"
+                                                Clip="{Binding RelativeSource={RelativeSource AncestorType=controls:ImageGrid}, Path=ImageClipGeometry}">
+                                                <Image.IsVisible>
+                                                    <MultiBinding Converter="{StaticResource ImageVisibilityConverter}">
+                                                        <Binding Path="ImageSource"/>
+                                                        <Binding Path="FallbackText"/>
+                                                    </MultiBinding>
+                                                </Image.IsVisible>
+                                            </Image>
+                                            <TextBlock Text="{Binding FallbackText}"
+                                                        VerticalAlignment="Bottom"
+                                                        HorizontalAlignment="Left"
+                                                        Width="{Binding RelativeSource={RelativeSource AncestorType=controls:ImageGrid}, Path=ImageSize.Width}"
+                                                        Height="{Binding RelativeSource={RelativeSource AncestorType=controls:ImageGrid}, Path=ImageSize.Height}"
+                                                        Padding="10">
+                                                <TextBlock.IsVisible>
+                                                    <MultiBinding Converter="{StaticResource TextVisibilityConverter}">
+                                                        <Binding Path="ImageSource"/>
+                                                        <Binding Path="FallbackText"/>
+                                                    </MultiBinding>
+                                                </TextBlock.IsVisible>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
 </ResourceDictionary>

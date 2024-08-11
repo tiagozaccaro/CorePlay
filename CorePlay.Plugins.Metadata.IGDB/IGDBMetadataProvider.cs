@@ -43,7 +43,7 @@ namespace CorePlay.Plugins.Metadata.IGDB
                 {
                     GameId = game.Id?.ToString() ?? string.Empty,
                     Name = game.Name?.RemoveTrademarks() ?? string.Empty,
-                    Cover = game.Cover?.Value != null ? $"https:{ImageHelper.GetImageUrl(imageId: game.Cover.Value.ImageId, ImageSize.CoverSmall, retina: false)}" : null,
+                    Cover = game.Cover?.Value != null ? $"https:{ImageHelper.GetImageUrl(imageId: game.Cover.Value.ImageId, ImageSize.CoverBig, retina: true)}" : null,
                     Videos = game.Videos?.Values != null ? game.Videos.Values.Select(v => $"https://www.youtube.com/watch?v={v.VideoId}").ToList() : []
                     //Platforms = game.platforms.Select(p => new MetadataIdProperty(p)),
                 };

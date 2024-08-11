@@ -10,7 +10,7 @@ namespace CorePlay.Converters
     {
         public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
         {
-            Bitmap? imageSource = values[0] as Bitmap;
+            string? imageSource = values[0] as string;
             return imageSource != null;
         }
 

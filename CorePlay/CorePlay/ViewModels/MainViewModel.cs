@@ -17,7 +17,7 @@ namespace CorePlay.ViewModels
         private readonly IEnumerable<ILibraryProvider> _libraryProviders;
         private readonly IEnumerable<IMetadataProvider> _metadataProviders;
 
-        public ObservableCollection<ImageGridItem> Items { get; } = new ObservableCollection<ImageGridItem>();
+        public ObservableCollection<ImageGridItem> Items { get; } = [];
 
         // Constructor for actual use
         public MainViewModel(CorePlayDatabaseContext database, IEnumerable<ILibraryProvider> libraryProviders, IEnumerable<IMetadataProvider> metadataProviders)
@@ -26,52 +26,6 @@ namespace CorePlay.ViewModels
             _libraryProviders = libraryProviders ?? throw new ArgumentNullException(nameof(libraryProviders));
             _metadataProviders = metadataProviders ?? throw new ArgumentNullException(nameof(metadataProviders));
             LoadGamesAsync().ConfigureAwait(false);
-        }
-
-        // Parameterless constructor for mock data
-        public MainViewModel()
-        {
-            InitializeMockData();
-        }
-
-        private void InitializeMockData()
-        {
-            var mockGames = new List<Game>
-            {
-                new Game
-                {
-                    GameId = Guid.NewGuid().ToString(),
-                    Name = "Mock Game 1",
-                    Cover = "https://via.placeholder.com/150",
-                    Description = "Description for Mock Game 1",
-                    Icon = "https://via.placeholder.com/50",
-                    LastActivity = DateTime.Now.AddDays(-1),
-                    Logo = "https://via.placeholder.com/100",
-                    Playtime = 120,
-                    Videos = new List<string> { "https://www.youtube.com/watch?v=mockvideo1" }
-                },
-                new Game
-                {
-                    GameId = Guid.NewGuid().ToString(),
-                    Name = "Mock Game 2",
-                    Cover = "https://via.placeholder.com/150",
-                    Description = "Description for Mock Game 2",
-                    Icon = "https://via.placeholder.com/50",
-                    LastActivity = DateTime.Now.AddDays(-2),
-                    Logo = "https://via.placeholder.com/100",
-                    Playtime = 250,
-                    Videos = new List<string> { "https://www.youtube.com/watch?v=mockvideo2" }
-                }
-            };
-
-            foreach (var game in mockGames)
-            {
-                Items.Add(new ImageGridItem
-                {
-                    FallbackText = game.Name,
-                    ImageSource = ImageHelper.LoadFromWeb(new Uri(game.Cover)).Result
-                });
-            }
         }
 
         private async Task LoadGamesAsync()
@@ -140,12 +94,12 @@ namespace CorePlay.ViewModels
 
             foreach (var game in games)
             {
-                var imageSource = game.Cover != null ? await ImageHelper.LoadFromWeb(new Uri(game.Cover)) : null;
+                //var imageSource = game.Cover != null ? await ImageHelper.LoadFromWeb(new Uri(game.Cover)) : null;
 
                 Items.Add(new ImageGridItem
                 {
                     FallbackText = game.Name,
-                    ImageSource = imageSource,
+                    ImageSource = game.Cover,
                 });
             }
         }
