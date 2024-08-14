@@ -17,7 +17,9 @@ namespace CorePlay.ViewModels
         private readonly IEnumerable<ILibraryProvider> _libraryProviders;
         private readonly IEnumerable<IMetadataProvider> _metadataProviders;
 
-        public ObservableCollection<ImageGridItem> Items { get; } = [];
+        public ObservableCollection<ImageListItem> Items { get; } = [];
+
+        public MainViewModel() { }
 
         // Constructor for actual use
         public MainViewModel(CorePlayDatabaseContext database, IEnumerable<ILibraryProvider> libraryProviders, IEnumerable<IMetadataProvider> metadataProviders)
@@ -79,6 +81,12 @@ namespace CorePlay.ViewModels
                         }
 
                         await _database.Games.InsertAsync(dbGame);
+
+                        Items.Add(new ImageListItem
+                        {
+                            FallbackText = dbGame.Name,
+                            ImageSource = dbGame.Cover
+                        });
                     }
                 }
             }
@@ -96,7 +104,7 @@ namespace CorePlay.ViewModels
             {
                 //var imageSource = game.Cover != null ? await ImageHelper.LoadFromWeb(new Uri(game.Cover)) : null;
 
-                Items.Add(new ImageGridItem
+                Items.Add(new ImageListItem
                 {
                     FallbackText = game.Name,
                     ImageSource = game.Cover,

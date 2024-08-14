@@ -4,33 +4,35 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Media.TextFormatting;
 using Avalonia.VisualTree;
+using CorePlay.Enums;
 using CorePlay.Models;
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 
-namespace CorePlay.Views.CustomControls
+namespace CorePlay.Controls
 {
     public class ImageGrid : TemplatedControl
     {
-        public static readonly StyledProperty<string> LayoutModeProperty =
-            AvaloniaProperty.Register<ImageGrid, string>(nameof(LayoutMode), "Grid");
+        public static readonly StyledProperty<LayoutMode> LayoutModeProperty =
+            AvaloniaProperty.Register<ImageGrid, LayoutMode>(nameof(LayoutMode), LayoutMode.Grid);
 
         public static readonly StyledProperty<Orientation> OrientationProperty =
             AvaloniaProperty.Register<ImageGrid, Orientation>(nameof(Orientation), Orientation.Vertical);
 
-        public static readonly StyledProperty<ObservableCollection<ImageGridItem>> ItemsProperty =
-            AvaloniaProperty.Register<ImageGrid, ObservableCollection<ImageGridItem>>(nameof(Items), new ObservableCollection<ImageGridItem>());
+        public static readonly StyledProperty<ObservableCollection<ImageListItem>> ItemsSourceProperty =
+            AvaloniaProperty.Register<ImageGrid, ObservableCollection<ImageListItem>>(nameof(ItemsSource), []);
 
-        public static readonly StyledProperty<ImageGridItem> SelectedItemProperty =
-            AvaloniaProperty.Register<ImageGrid, ImageGridItem>(nameof(SelectedItem));
+        public static readonly StyledProperty<ImageListItem> SelectedItemProperty =
+            AvaloniaProperty.Register<ImageGrid, ImageListItem>(nameof(SelectedItem));
 
         public static readonly StyledProperty<Size> ImageSizeProperty =
             AvaloniaProperty.Register<ImageGrid, Size>(nameof(ImageSize), new Size(100, 100));
 
-        public string LayoutMode
+        public LayoutMode LayoutMode
         {
             get => GetValue(LayoutModeProperty);
             set => SetValue(LayoutModeProperty, value);
@@ -42,13 +44,13 @@ namespace CorePlay.Views.CustomControls
             set => SetValue(OrientationProperty, value);
         }
 
-        public ObservableCollection<ImageGridItem> Items
+        public ObservableCollection<ImageListItem> ItemsSource
         {
-            get => GetValue(ItemsProperty);
-            set => SetValue(ItemsProperty, value);
+            get => GetValue(ItemsSourceProperty);
+            set => SetValue(ItemsSourceProperty, value);
         }
 
-        public ImageGridItem SelectedItem
+        public ImageListItem SelectedItem
         {
             get => GetValue(SelectedItemProperty);
             set => SetValue(SelectedItemProperty, value);
@@ -71,17 +73,17 @@ namespace CorePlay.Views.CustomControls
         public ImageGrid()
         {
             Focusable = true;
-            ItemsProperty.Changed.Subscribe(OnItemsChanged);
-            SubscribeToCollectionChanged(Items);
+            ItemsSourceProperty.Changed.Subscribe(OnItemsChanged);
+            SubscribeToCollectionChanged(ItemsSource);
         }
 
-        private void OnItemsChanged(AvaloniaPropertyChangedEventArgs<ObservableCollection<ImageGridItem>> e)
+        private void OnItemsChanged(AvaloniaPropertyChangedEventArgs<ObservableCollection<ImageListItem>> e)
         {
             SubscribeToCollectionChanged(e.NewValue.Value);
             UpdateSelectedItemOnItemsChange();
         }
 
-        private void SubscribeToCollectionChanged(ObservableCollection<ImageGridItem> collection)
+        private void SubscribeToCollectionChanged(ObservableCollection<ImageListItem> collection)
         {
             if (collection != null)
             {
@@ -96,15 +98,15 @@ namespace CorePlay.Views.CustomControls
 
         private void UpdateSelectedItemOnItemsChange()
         {
-            if (Items == null || Items.Count == 0)
+            if (ItemsSource == null || ItemsSource.Count == 0)
             {
                 SelectedItem = null;
             }
             else
             {
-                if (SelectedItem == null || !Items.Contains(SelectedItem))
+                if (SelectedItem == null || !ItemsSource.Contains(SelectedItem))
                 {
-                    SelectedItem = Items.First();
+                    SelectedItem = ItemsSource.First();
                 }
             }
         }
@@ -117,9 +119,9 @@ namespace CorePlay.Views.CustomControls
             {
                 if (SelectedItem == null)
                 {
-                    if (Items != null && Items.Any())
+                    if (ItemsSource != null && ItemsSource.Any())
                     {
-                        SelectedItem = Items.First();
+                        SelectedItem = ItemsSource.First();
                     }
                 }
                 else
@@ -133,7 +135,7 @@ namespace CorePlay.Views.CustomControls
 
         private void NavigateImages(Key key)
         {
-            var items = Items?.ToList();
+            var items = ItemsSource?.ToList();
             if (items == null || items.Count == 0) return;
 
             if (SelectedItem == null)
@@ -148,22 +150,53 @@ namespace CorePlay.Views.CustomControls
             int newIndex;
             int columns = GetNumberOfColumns();
 
-            switch (key)
+            if (LayoutMode == LayoutMode.Grid)
             {
-                case Key.Left:
-                    newIndex = (currentIndex - 1 + items.Count) % items.Count;
-                    break;
-                case Key.Right:
-                    newIndex = (currentIndex + 1) % items.Count;
-                    break;
-                case Key.Up:
-                    newIndex = GetPreviousRowIndex(currentIndex, items.Count, columns);
-                    break;
-                case Key.Down:
-                    newIndex = GetNextRowIndex(currentIndex, items.Count, columns);
-                    break;
-                default:
-                    return;
+                switch (key)
+                {
+                    case Key.Left:
+                        newIndex = (currentIndex - 1 + items.Count) % items.Count;
+                        break;
+                    case Key.Right:
+                        newIndex = (currentIndex + 1) % items.Count;
+                        break;
+                    case Key.Up:
+                        newIndex = GetPreviousRowIndex(currentIndex, items.Count, columns);
+                        break;
+                    case Key.Down:
+                        newIndex = GetNextRowIndex(currentIndex, items.Count, columns);
+                        break;
+                    default:
+                        return;
+                }
+            }
+            else if (Orientation == Orientation.Vertical)
+            {
+                switch (key)
+                {
+                    case Key.Up:
+                        newIndex = (currentIndex - 1 + items.Count) % items.Count;
+                        break;
+                    case Key.Down:
+                        newIndex = (currentIndex + 1) % items.Count;
+                        break;
+                    default:
+                        return;
+                }
+            }
+            else
+            {
+                switch (key)
+                {
+                    case Key.Left:
+                        newIndex = (currentIndex - 1 + items.Count) % items.Count;
+                        break;
+                    case Key.Down:
+                        newIndex = (currentIndex + 1) % items.Count;
+                        break;
+                    default:
+                        return;
+                }
             }
 
             SelectedItem = items[newIndex];
@@ -193,7 +226,7 @@ namespace CorePlay.Views.CustomControls
         private static int GetPreviousRowIndex(int currentIndex, int itemCount, int columns)
         {
             int currentRow = currentIndex / columns;
-            int previousRow = Math.Max(0, currentRow - 1);
+            int previousRow = (currentRow - 1 + (itemCount / columns)) % (itemCount / columns);
             return previousRow * columns + (currentIndex % columns);
         }
 
@@ -201,9 +234,9 @@ namespace CorePlay.Views.CustomControls
         {
             int rows = (itemCount + columns - 1) / columns;
             int currentRow = currentIndex / columns;
-            int nextRow = Math.Min(rows - 1, currentRow + 1);
+            int nextRow = (currentRow + 1) % rows;
             int newIndex = nextRow * columns + (currentIndex % columns);
-            return newIndex < itemCount ? newIndex : currentIndex;
+            return newIndex < itemCount ? newIndex : (nextRow * columns + (currentIndex % columns));
         }
 
         protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
@@ -231,7 +264,7 @@ namespace CorePlay.Views.CustomControls
             if (itemsControl == null) return;
 
             // Get the index of the selected item
-            var items = Items?.ToList();
+            var items = ItemsSource?.ToList();
             if (items == null || SelectedItem == null) return;
 
             int index = items.IndexOf(SelectedItem);

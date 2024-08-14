@@ -1,6 +1,6 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:controls="using:CorePlay.Views.CustomControls"
+                    xmlns:controls="using:CorePlay.Controls"
                     xmlns:models="clr-namespace:CorePlay.Models"
                     xmlns:local="clr-namespace:CorePlay.Converters"
                     xmlns:asyncImageLoader="clr-namespace:AsyncImageLoader;assembly=AsyncImageLoader.Avalonia">
@@ -13,7 +13,7 @@
     <Design.PreviewWith>
         <StackPanel Width="400" Spacing="10">
             <StackPanel Background="{DynamicResource SystemRegionBrush}">
-                <controls:ImageGrid />
+                <controls:ImageGrid Orientation="Vertical" />
             </StackPanel>
         </StackPanel>
     </Design.PreviewWith>
@@ -21,10 +21,10 @@
     <ControlTheme x:Key="{x:Type controls:ImageGrid}" TargetType="controls:ImageGrid">
         <Setter Property="Template">
             <ControlTemplate>
-                <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" >
                     <ScrollViewer VerticalScrollBarVisibility="Hidden">
                         <ItemsControl x:Name="PART_ItemsControl"
-                                        ItemsSource="{TemplateBinding Items}"
+                                        ItemsSource="{TemplateBinding ItemsSource}"
                                         Background="Transparent" Margin="0 20">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -32,13 +32,13 @@
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
-                                <DataTemplate DataType="models:ImageGridItem">
+                                <DataTemplate DataType="models:ImageListItem">
                                     <Border
                                         BorderThickness="4"
                                         CornerRadius="10"
                                         Background="Transparent"
                                         IsHitTestVisible="True"
-                                        Margin="4"
+                                        Margin="3"
                                         Focusable="True">
                                         <Border.BorderBrush>
                                             <MultiBinding Converter="{StaticResource SelectedItemConverter}">

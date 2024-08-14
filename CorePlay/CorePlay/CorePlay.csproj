@@ -25,4 +25,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\CorePlay.SDK\CorePlay.SDK.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Themes\Controls\" />
+  </ItemGroup>
 </Project>

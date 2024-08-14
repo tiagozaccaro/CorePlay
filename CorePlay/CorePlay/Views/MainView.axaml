@@ -3,7 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:CorePlay.ViewModels"
-			 xmlns:local="using:CorePlay.Views.CustomControls"
+			 xmlns:local="using:CorePlay.Controls"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CorePlay.Views.MainView"
              x:DataType="vm:MainViewModel">
@@ -13,5 +13,5 @@
 		<vm:MainViewModel />
 	</Design.DataContext>
 
-	<local:ImageGrid Items="{Binding Items}" ImageSize="264,352" Orientation="Vertical" />
+	<local:ImageGrid ItemsSource="{Binding Items}" ImageSize="264,352" Orientation="Horizontal" />
 </UserControl>

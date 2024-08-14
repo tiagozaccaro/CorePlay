@@ -11,7 +11,7 @@ namespace CorePlay.Converters
     {
         public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
         {
-            if (values.Count == 2 && values[0] is ImageGridItem selectedItem && values[1] is ImageGridItem currentItem)
+            if (values.Count == 2 && values[0] is ImageListItem selectedItem && values[1] is ImageListItem currentItem)
             {
                 // Implement your logic to compare the selected item with the current item
                 // Example: If the current item is selected, return a color, else return null or default value

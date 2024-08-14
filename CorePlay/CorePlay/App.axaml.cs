@@ -29,7 +29,7 @@ namespace CorePlay
             services.AddSingleton(provider =>
             {
                 var logger = provider.GetRequiredService<ILogger<CorePlayDatabaseContext>>();
-                return new CorePlayDatabaseContext("../../deploy/coreplay.db", logger);
+                return new CorePlayDatabaseContext("D:\\Documents\\CorePlay\\deploy\\plugins\\coreplay.db", logger);
             });
 
             // Build initial service provider
@@ -37,7 +37,7 @@ namespace CorePlay
 
             // Configure PluginLoader and load plugins
             var pluginLoader = serviceProvider.GetRequiredService<PluginLoader>();
-            pluginLoader.LoadPlugins("../../deploy/plugins", services);
+            pluginLoader.LoadPlugins("D:\\Documents\\CorePlay\\deploy\\plugins", services);
 
             // Build the final service provider
             serviceProvider = services.BuildServiceProvider();
