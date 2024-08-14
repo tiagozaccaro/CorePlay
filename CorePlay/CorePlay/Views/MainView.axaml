@@ -13,5 +13,5 @@
 		<vm:MainViewModel />
 	</Design.DataContext>
 
-	<local:ImageGrid ItemsSource="{Binding Items}" ImageSize="264,352" Orientation="Horizontal" />
+	<local:ImageGrid ItemsSource="{Binding Items}" ImageSize="264,352" />
 </UserControl>

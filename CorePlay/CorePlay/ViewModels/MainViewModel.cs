@@ -63,31 +63,33 @@ namespace CorePlay.ViewModels
                             Videos = game.Videos,
                         };
 
+                        await _database.Games.InsertAsync(dbGame);
+
                         foreach (var metadataProvider in _metadataProviders)
                         {
                             var metaGame = await metadataProvider.GetGameMetadataAsync(game.Name);
 
                             if (metaGame != null)
                             {
-                                dbGame.Cover = metaGame.Cover;
-                                dbGame.Description = metaGame.Description;
-                                dbGame.Icon = metaGame.Icon;
-                                dbGame.LastActivity = metaGame.LastActivity;
-                                dbGame.Logo = metaGame.Logo;
-                                dbGame.Name = metaGame.Name;
-                                dbGame.Playtime = metaGame.Playtime;
-                                dbGame.Videos = metaGame.Videos;
+                                dbGame.Cover = dbGame.Cover ?? metaGame.Cover;
+                                dbGame.Description = dbGame.Description ?? metaGame.Description;
+                                dbGame.Icon = dbGame.Icon ?? metaGame.Icon;
+                                dbGame.LastActivity = dbGame.LastActivity ?? metaGame.LastActivity;
+                                dbGame.Logo = dbGame.Logo ?? metaGame.Logo;
+                                dbGame.Name = dbGame.Name ?? metaGame.Name;
+                                dbGame.Playtime = dbGame.Playtime == 0 ? metaGame.Playtime : dbGame.Playtime;
+                                dbGame.Videos = dbGame.Videos ?? metaGame.Videos;
                             }
                         }
 
-                        await _database.Games.InsertAsync(dbGame);
-
-                        Items.Add(new ImageListItem
-                        {
-                            FallbackText = dbGame.Name,
-                            ImageSource = dbGame.Cover
-                        });
+                        await _database.Games.UpdateAsync(dbGame);
                     }
+
+                    Items.Add(new ImageListItem
+                    {
+                        FallbackText = dbGame.Name,
+                        ImageSource = dbGame.Cover
+                    });
                 }
             }
             catch (Exception ex)

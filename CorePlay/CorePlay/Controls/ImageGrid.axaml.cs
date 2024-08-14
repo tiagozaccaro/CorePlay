@@ -4,6 +4,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using Avalonia.Media.TextFormatting;
 using Avalonia.VisualTree;
 using CorePlay.Enums;
@@ -199,6 +200,16 @@ namespace CorePlay.Controls
                 }
             }
 
+            if (newIndex < 0)
+            {
+                newIndex = 0;
+            }
+
+            if (newIndex >= items.Count)
+            {
+                newIndex = items.Count - 1;
+            }
+
             SelectedItem = items[newIndex];
         }
 
@@ -226,7 +237,16 @@ namespace CorePlay.Controls
         private static int GetPreviousRowIndex(int currentIndex, int itemCount, int columns)
         {
             int currentRow = currentIndex / columns;
-            int previousRow = (currentRow - 1 + (itemCount / columns)) % (itemCount / columns);
+            int previousRow = 0;
+
+            if (itemCount / columns == 0)
+            {
+                previousRow = (currentRow - 1 + (itemCount / columns));
+            } else
+            {
+                previousRow = (currentRow - 1 + (itemCount / columns)) % (itemCount / columns);
+            }
+            
             return previousRow * columns + (currentIndex % columns);
         }
 
