@@ -1,0 +1,94 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:CorePlay.Controls"
+        xmlns:models="clr-namespace:CorePlay.Models"
+        xmlns:asyncImageLoader="clr-namespace:AsyncImageLoader;assembly=AsyncImageLoader.Avalonia">
+    <!-- Register converters -->
+    <!-- Define the template for ImageGrid -->
+    <Style Selector="controls|ImageGrid">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="controls:ImageGrid">
+                    <Grid VerticalAlignment="Center"
+                          HorizontalAlignment="Center">
+                        <ScrollViewer x:Name="PART_ScrollViewer">
+                            <ItemsControl x:Name="PART_ItemsControl"
+                                          ItemsSource="{TemplateBinding ItemsSource}"
+                                          Background="Transparent"
+                                          Margin="0 20">
+                                <!-- This ItemsPanelTemplate will be defined in the styles based on LayoutMode -->
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="models:ImageListItem">
+                                        <Border BorderThickness="4"
+                                                CornerRadius="10"
+                                                Margin="4"
+                                                Background="Transparent"
+                                                Width="{Binding RelativeSource={RelativeSource AncestorType=controls:ImageGrid}, Path=ImageSize.Width}"
+                                                Height="{Binding RelativeSource={RelativeSource AncestorType=controls:ImageGrid}, Path=ImageSize.Height}"
+                                                Focusable="True">
+                                            <Border.BorderBrush>
+                                                <MultiBinding Converter="{StaticResource SelectedItemConverter}">
+                                                    <Binding RelativeSource="{RelativeSource AncestorType=controls:ImageGrid}"
+                                                             Path="SelectedItem" />
+                                                    <Binding Path="." />
+                                                </MultiBinding>
+                                            </Border.BorderBrush>
+                                            <Panel>
+                                                <Image asyncImageLoader:ImageLoader.Source="{Binding ImageSource}"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       Stretch="{Binding RelativeSource={RelativeSource AncestorType=controls:ImageGrid}, Path=Stretch}" />
+                                                <TextBlock Text="{Binding FallbackText}"
+                                                           VerticalAlignment="Bottom"
+                                                           HorizontalAlignment="Left"
+                                                           Padding="10" />
+                                            </Panel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <!-- Default ScrollViewer style for Grid layout -->
+    <Style Selector="controls|ImageGrid[LayoutMode=Grid] /template/ ScrollViewer">
+        <Setter Property="VerticalScrollBarVisibility"
+                Value="Hidden" />
+        <Setter Property="HorizontalScrollBarVisibility"
+                Value="Disabled" />
+    </Style>
+    <!-- ScrollViewer style for List layout -->
+    <Style Selector="controls|ImageGrid[LayoutMode=List] /template/ ScrollViewer">
+        <Setter Property="VerticalScrollBarVisibility"
+                Value="Disabled" />
+        <Setter Property="HorizontalScrollBarVisibility"
+                Value="Hidden" />
+    </Style>
+    <!-- Styles for Grid and List LayoutModes -->
+    <Style Selector="controls|ImageGrid[LayoutMode=Grid] /template/ ItemsControl">
+        <Setter Property="ItemsPanel">
+            <Setter.Value>
+                <ItemsPanelTemplate>
+                    <WrapPanel />
+                </ItemsPanelTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style Selector="controls|ImageGrid[LayoutMode=List] /template/ ItemsControl">
+        <Setter Property="ItemsPanel">
+            <Setter.Value>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="{Binding Orientation, RelativeSource={RelativeSource AncestorType=controls:ImageGrid}}" />
+                </ItemsPanelTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</Styles>

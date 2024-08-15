@@ -8,6 +8,7 @@ using Avalonia.VisualTree;
 using CorePlay.Enums;
 using CorePlay.Models;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace CorePlay.Controls
             AvaloniaProperty.Register<ImageGrid, LayoutMode>(nameof(LayoutMode), LayoutMode.Grid);
 
         public static readonly StyledProperty<Orientation> OrientationProperty =
-            AvaloniaProperty.Register<ImageGrid, Orientation>(nameof(Orientation), Orientation.Vertical);
+            AvaloniaProperty.Register<ImageGrid, Orientation>(nameof(Orientation), Orientation.Horizontal);
 
         public static readonly StyledProperty<ObservableCollection<ImageListItem>> ItemsSourceProperty =
             AvaloniaProperty.Register<ImageGrid, ObservableCollection<ImageListItem>>(nameof(ItemsSource), []);
@@ -193,30 +194,52 @@ namespace CorePlay.Controls
             var currentIndex = items.IndexOf(SelectedItem);
             if (currentIndex == -1) return;
 
-            int newIndex;
+            int newIndex = -1;
             int columns = GetNumberOfColumns();
 
             if (LayoutMode == LayoutMode.Grid)
             {
-                switch (key)
-                {
-                    case Key.Left:
-                        newIndex = (currentIndex - 1 + items.Count) % items.Count;
-                        break;
-                    case Key.Right:
-                        newIndex = (currentIndex + 1) % items.Count;
-                        break;
-                    case Key.Up:
-                        newIndex = GetPreviousRowIndex(currentIndex, items.Count, columns);
-                        break;
-                    case Key.Down:
-                        newIndex = GetNextRowIndex(currentIndex, items.Count, columns);
-                        break;
-                    default:
-                        return;
-                }
+                newIndex = NavigateGridLayout(key, currentIndex, items, columns);
             }
-            else if (Orientation == Orientation.Vertical)
+            else
+            {
+                newIndex = NavigateListLayout(key, currentIndex, items);
+            }
+
+            if (newIndex >= 0 && newIndex < items.Count)
+            {
+                SelectedItem = items[newIndex];
+            }
+        }
+
+        private static int NavigateGridLayout(Key key, int currentIndex, List<ImageListItem> items, int columns)
+        {
+            int newIndex = currentIndex;
+
+            switch (key)
+            {
+                case Key.Left:
+                    newIndex = (currentIndex - 1 + items.Count) % items.Count;
+                    break;
+                case Key.Right:
+                    newIndex = (currentIndex + 1) % items.Count;
+                    break;
+                case Key.Up:
+                    newIndex = GetPreviousRowIndex(currentIndex, items.Count, columns);
+                    break;
+                case Key.Down:
+                    newIndex = GetNextRowIndex(currentIndex, items.Count, columns);
+                    break;
+            }
+
+            return newIndex;
+        }
+
+        private int NavigateListLayout(Key key, int currentIndex, List<ImageListItem> items)
+        {
+            int newIndex = currentIndex;
+
+            if (Orientation == Orientation.Vertical)
             {
                 switch (key)
                 {
@@ -226,8 +249,6 @@ namespace CorePlay.Controls
                     case Key.Down:
                         newIndex = (currentIndex + 1) % items.Count;
                         break;
-                    default:
-                        return;
                 }
             }
             else
@@ -237,25 +258,13 @@ namespace CorePlay.Controls
                     case Key.Left:
                         newIndex = (currentIndex - 1 + items.Count) % items.Count;
                         break;
-                    case Key.Down:
+                    case Key.Right:
                         newIndex = (currentIndex + 1) % items.Count;
                         break;
-                    default:
-                        return;
                 }
             }
 
-            if (newIndex < 0)
-            {
-                newIndex = 0;
-            }
-
-            if (newIndex >= items.Count)
-            {
-                newIndex = items.Count - 1;
-            }
-
-            SelectedItem = items[newIndex];
+            return newIndex;
         }
 
         private int GetNumberOfColumns()

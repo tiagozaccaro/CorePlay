@@ -15,9 +15,9 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
-            <RowDefinition Height="190" />
+            <RowDefinition Height="200" />
         </Grid.RowDefinitions>
         <local:ImageGrid Grid.Row="0" ItemsSource="{Binding Items}" ImageSize="264,352" Stretch="UniformToFill"/>
-        <local:ImageGrid Grid.Row="1" ItemsSource="{Binding Platforms}" ImageSize="160,160"/>
+        <local:ImageGrid Grid.Row="1" ItemsSource="{Binding Platforms}" ImageSize="160,160" LayoutMode="List"/>
     </Grid>
 </UserControl>
