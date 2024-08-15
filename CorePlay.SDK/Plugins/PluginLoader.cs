@@ -1,6 +1,7 @@
 ﻿using CorePlay.SDK.Interfaces.Plugins;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace CorePlay.SDK.Plugins
@@ -22,14 +23,21 @@ namespace CorePlay.SDK.Plugins
 
             foreach (var assembly in assemblies)
             {
-                var pluginTypes = assembly.GetTypes().Where(t => typeof(IPlugin).IsAssignableFrom(t) && !t.IsAbstract);
-
-                foreach (var type in pluginTypes)
+                try
                 {
-                    if (Activator.CreateInstance(type) is IPlugin plugin)
+                    var pluginTypes = assembly.GetTypes().Where(t => typeof(IPlugin).IsAssignableFrom(t) && !t.IsAbstract);
+
+                    foreach (var type in pluginTypes)
                     {
-                        plugin.ConfigureServices(services);
+                        if (Activator.CreateInstance(type) is IPlugin plugin)
+                        {
+                            plugin.ConfigureServices(services);
+                        }
                     }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to Load Plugin");
                 }
             }
         }

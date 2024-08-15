@@ -2,7 +2,7 @@
 {
     public class GameMetadata
     {
-        public string GameId { get; set; } = string.Empty;
+        public string Id { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public ulong Playtime { get; set; }

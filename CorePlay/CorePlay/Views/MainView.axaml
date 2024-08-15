@@ -12,6 +12,12 @@
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
 		<vm:MainViewModel />
 	</Design.DataContext>
-
-	<local:ImageGrid ItemsSource="{Binding Items}" ImageSize="264,352" />
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="190" />
+        </Grid.RowDefinitions>
+        <local:ImageGrid Grid.Row="0" ItemsSource="{Binding Items}" ImageSize="264,352" Stretch="UniformToFill"/>
+        <local:ImageGrid Grid.Row="1" ItemsSource="{Binding Platforms}" ImageSize="160,160"/>
+    </Grid>
 </UserControl>

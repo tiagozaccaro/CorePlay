@@ -1,5 +1,7 @@
+using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using CorePlay.SDK.Database;
 using CorePlay.SDK.Interfaces.Providers;
@@ -29,7 +31,7 @@ namespace CorePlay
             services.AddSingleton(provider =>
             {
                 var logger = provider.GetRequiredService<ILogger<CorePlayDatabaseContext>>();
-                return new CorePlayDatabaseContext("D:\\Documents\\CorePlay\\deploy\\plugins\\coreplay.db", logger);
+                return new CorePlayDatabaseContext("../../deploy/plugins/coreplay.db", logger);
             });
 
             // Build initial service provider
@@ -37,7 +39,7 @@ namespace CorePlay
 
             // Configure PluginLoader and load plugins
             var pluginLoader = serviceProvider.GetRequiredService<PluginLoader>();
-            pluginLoader.LoadPlugins("D:\\Documents\\CorePlay\\deploy\\plugins", services);
+            pluginLoader.LoadPlugins("../../deploy/plugins", services);
 
             // Build the final service provider
             serviceProvider = services.BuildServiceProvider();

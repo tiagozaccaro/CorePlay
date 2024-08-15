@@ -19,7 +19,7 @@
 	<ControlTheme x:Key="{x:Type controls:ImageGrid}" TargetType="controls:ImageGrid">
 		<Setter Property="Template">
 			<ControlTemplate>
-				<Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" >
+				<Grid VerticalAlignment="Center" HorizontalAlignment="Center">
 					<ScrollViewer VerticalScrollBarVisibility="Hidden">
 						<ItemsControl x:Name="PART_ItemsControl"
                                         ItemsSource="{TemplateBinding ItemsSource}"
@@ -34,6 +34,7 @@
 									<Border
                                         BorderThickness="4"
                                         CornerRadius="10"
+										Margin="4"
                                         Background="Transparent"
 										Width="{Binding RelativeSource={RelativeSource AncestorType=controls:ImageGrid}, Path=ImageSize.Width}"
                                         Height="{Binding RelativeSource={RelativeSource AncestorType=controls:ImageGrid}, Path=ImageSize.Height}"
@@ -49,8 +50,8 @@
                                                 asyncImageLoader:ImageLoader.Source="{Binding ImageSource}"
                                                 HorizontalAlignment="Center"
                                                 VerticalAlignment="Center"
-												Stretch="UniformToFill"
-												Clip="{Binding RelativeSource={RelativeSource AncestorType=controls:ImageGrid}, Path=ImageClipGeometry}">
+												Stretch="{Binding RelativeSource={RelativeSource AncestorType=controls:ImageGrid}, Path=Stretch}">
+												<!-- Clip="{Binding RelativeSource={RelativeSource AncestorType=controls:ImageGrid}, Path=ImageClipGeometry}"> -->
 											</Image>
 											<TextBlock Text="{Binding FallbackText}"
                                                         VerticalAlignment="Bottom"

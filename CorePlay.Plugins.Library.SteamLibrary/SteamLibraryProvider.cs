@@ -37,7 +37,7 @@ namespace CorePlay.Plugins.Library.SteamLibrary
                 return games.Select(g => new GameMetadata
                 {
                     Source = new MetadataNameProperty("Steam"),
-                    GameId = g.AppId.ToString(),
+                    Id = g.AppId.ToString(),
                     Name = g.Name.RemoveTrademarks(),
                     Platforms = new HashSet<MetadataProperty> { new MetadataSpecProperty("pc_windows") },
                     Playtime = (ulong)(g.PlaytimeForever * 60)

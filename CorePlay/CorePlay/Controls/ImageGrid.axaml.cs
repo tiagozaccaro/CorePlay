@@ -4,8 +4,6 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
-using Avalonia.Media.Imaging;
-using Avalonia.Media.TextFormatting;
 using Avalonia.VisualTree;
 using CorePlay.Enums;
 using CorePlay.Models;
@@ -32,6 +30,51 @@ namespace CorePlay.Controls
 
         public static readonly StyledProperty<Size> ImageSizeProperty =
             AvaloniaProperty.Register<ImageGrid, Size>(nameof(ImageSize), new Size(100, 100));
+
+        public static readonly StyledProperty<Key> MoveLeftKeyProperty =
+            AvaloniaProperty.Register<ImageGrid, Key>(nameof(MoveLeftKey), Key.Left);
+
+        public static readonly StyledProperty<Key> MoveRightKeyProperty =
+            AvaloniaProperty.Register<ImageGrid, Key>(nameof(MoveRightKey), Key.Right);
+
+        public static readonly StyledProperty<Key> MoveUpKeyProperty =
+            AvaloniaProperty.Register<ImageGrid, Key>(nameof(MoveUpKey), Key.Up);
+
+        public static readonly StyledProperty<Key> MoveDownKeyProperty =
+            AvaloniaProperty.Register<ImageGrid, Key>(nameof(MoveDownKey), Key.Down);
+
+        public static readonly StyledProperty<Stretch> StretchProperty =
+                AvaloniaProperty.Register<ImageGrid, Stretch>(nameof(Stretch), Stretch.Uniform);
+
+        public Stretch Stretch
+        {
+            get => GetValue(StretchProperty);
+            set => SetValue(StretchProperty, value);
+        }
+
+        public Key MoveLeftKey
+        {
+            get => GetValue(MoveLeftKeyProperty);
+            set => SetValue(MoveLeftKeyProperty, value);
+        }
+
+        public Key MoveRightKey
+        {
+            get => GetValue(MoveRightKeyProperty);
+            set => SetValue(MoveRightKeyProperty, value);
+        }
+
+        public Key MoveUpKey
+        {
+            get => GetValue(MoveUpKeyProperty);
+            set => SetValue(MoveUpKeyProperty, value);
+        }
+
+        public Key MoveDownKey
+        {
+            get => GetValue(MoveDownKeyProperty);
+            set => SetValue(MoveDownKeyProperty, value);
+        }
 
         public LayoutMode LayoutMode
         {
@@ -116,7 +159,9 @@ namespace CorePlay.Controls
         {
             base.OnKeyDown(e);
 
-            if (e.Key == Key.Left || e.Key == Key.Right || e.Key == Key.Up || e.Key == Key.Down)
+            Key key = e.Key;
+
+            if (key == MoveLeftKey || key == MoveRightKey || key == MoveUpKey || key == MoveDownKey)
             {
                 if (SelectedItem == null)
                 {
@@ -127,7 +172,7 @@ namespace CorePlay.Controls
                 }
                 else
                 {
-                    NavigateImages(e.Key);
+                    NavigateImages(key);
                 }
 
                 e.Handled = true;
@@ -241,12 +286,13 @@ namespace CorePlay.Controls
 
             if (itemCount / columns == 0)
             {
-                previousRow = (currentRow - 1 + (itemCount / columns));
-            } else
+                previousRow = currentRow - 1 + (itemCount / columns);
+            }
+            else
             {
                 previousRow = (currentRow - 1 + (itemCount / columns)) % (itemCount / columns);
             }
-            
+
             return previousRow * columns + (currentIndex % columns);
         }
 
