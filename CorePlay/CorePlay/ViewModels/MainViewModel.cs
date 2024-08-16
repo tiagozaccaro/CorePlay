@@ -3,6 +3,7 @@ using CorePlay.Models;
 using CorePlay.SDK.Database;
 using CorePlay.SDK.Interfaces.Providers;
 using CorePlay.SDK.Models;
+using DynamicData;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -36,7 +37,7 @@ namespace CorePlay.ViewModels
 
         private async Task LoadPlatformsAsync(CancellationToken cancellationToken)
         {
-            await LoadPlatformsFromDatabaseAsync();
+            //await LoadPlatformsFromDatabaseAsync();
 
             string directoryPath = @"../../deploy/Assets/Platforms/Light - Color"; // Change this to your target directory path
 
@@ -47,7 +48,7 @@ namespace CorePlay.ViewModels
 
                 foreach (string fileName in files)
                 {
-                    var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
+                    var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName).Trim();
 
                     var dbPlatform = await _database.Platforms.Query()
                         .Where(g => g.Name == fileNameWithoutExtension).FirstOrDefaultAsync();
@@ -62,15 +63,16 @@ namespace CorePlay.ViewModels
                         };
 
                         await _database.Platforms.InsertAsync(dbPlatform);
+                        Console.WriteLine(dbPlatform.Name);
 
-                        if (!Platforms.Any(p => p.FallbackText == fileNameWithoutExtension))
-                        {
-                            Platforms.Add(new ImageListItem
-                            {
-                                FallbackText = fileNameWithoutExtension,
-                                ImageSource = fileName
-                            });
-                        }
+                        // if (!Platforms.Any(p => p.FallbackText == fileNameWithoutExtension))
+                        // {
+                        //     Platforms.Add(new ImageListItem
+                        //     {
+                        //         FallbackText = fileNameWithoutExtension,
+                        //         ImageSource = fileName
+                        //     });
+                        // }
                     }
 
                 }
@@ -95,10 +97,12 @@ namespace CorePlay.ViewModels
             try
             {
                 var games = await libraryProvider.GetGamesAsync();
+                var platforms = await _database.Platforms.Query().OrderBy(p => p.Name).ToListAsync();
+                var platformsHashSet = new HashSet<ImageListItem>();
 
                 foreach (var game in games)
                 {
-                    var dbGame = await _database.Games.Query().Where(g => g.GameId == game.Id).FirstOrDefaultAsync();
+                    var dbGame = await _database.Games.Query().Include(x => x.Platforms).OrderBy(g => g.Name).Where(g => g.GameId == game.Id).FirstOrDefaultAsync();
 
                     if (dbGame == null)
                     {
@@ -117,33 +121,38 @@ namespace CorePlay.ViewModels
                         };
 
                         await _database.Games.InsertAsync(dbGame);
+                    }
 
-                        foreach (var metadataProvider in _metadataProviders)
+                    foreach (var metadataProvider in _metadataProviders)
+                    {
+                        try
                         {
-                            try
-                            {
-                                var metaGame = await metadataProvider.GetGameMetadataByNameAsync(game.Name, cancellationToken);
+                            var metaGame = await metadataProvider.GetGameMetadataByNameAsync(game.Name, cancellationToken);
 
-                                if (metaGame != null)
+                            if (metaGame != null)
+                            {
+                                dbGame.Cover ??= metaGame.Cover;
+                                dbGame.Description ??= metaGame.Description;
+                                dbGame.Icon ??= metaGame.Icon;
+                                dbGame.LastActivity ??= metaGame.LastActivity;
+                                dbGame.Logo ??= metaGame.Logo;
+                                dbGame.Name ??= metaGame.Name;
+                                dbGame.Playtime = dbGame.Playtime == 0 ? metaGame.Playtime : dbGame.Playtime;
+                                dbGame.Videos ??= metaGame.Videos;
+
+                                foreach (var platform in platforms.Where(p => metaGame.Platforms.Any(meta => p.Name.Equals(((MetadataNameProperty)meta).Name, StringComparison.InvariantCultureIgnoreCase))).ToHashSet())
                                 {
-                                    dbGame.Cover ??= metaGame.Cover;
-                                    dbGame.Description ??= metaGame.Description;
-                                    dbGame.Icon ??= metaGame.Icon;
-                                    dbGame.LastActivity ??= metaGame.LastActivity;
-                                    dbGame.Logo ??= metaGame.Logo;
-                                    dbGame.Name ??= metaGame.Name;
-                                    dbGame.Playtime = dbGame.Playtime == 0 ? metaGame.Playtime : dbGame.Playtime;
-                                    dbGame.Videos ??= metaGame.Videos;
+                                    dbGame.Platforms.Add(platform);
                                 }
                             }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine(ex.ToString());
-                            }
                         }
-
-                        await _database.Games.UpdateAsync(dbGame);
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.ToString());
+                        }
                     }
+
+                    await _database.Games.UpdateAsync(dbGame);
 
                     if (!Items.Any(p => p.FallbackText == game?.Name))
                     {
@@ -153,7 +162,18 @@ namespace CorePlay.ViewModels
                             ImageSource = dbGame.Cover
                         });
                     }
+
+                    foreach (var platform in dbGame.Platforms)
+                    {
+                        platformsHashSet.Add(new ImageListItem
+                        {
+                            FallbackText = platform.Name,
+                            ImageSource = platform.Logo
+                        });
+                    }
                 }
+
+                Platforms.AddRange(platformsHashSet);
             }
             catch (Exception ex)
             {
@@ -163,7 +183,7 @@ namespace CorePlay.ViewModels
 
         private async Task LoadGamesFromDatabaseAsync()
         {
-            var games = await _database.Games.Query().OrderBy(g => g.Name).ToListAsync();
+            var games = await _database.Games.Include(x => x.Platforms).Query().OrderBy(g => g.Name).ToListAsync();
 
             foreach (var game in games)
             {
@@ -174,6 +194,15 @@ namespace CorePlay.ViewModels
                         FallbackText = game.Name,
                         ImageSource = game.Cover,
                     });
+                }
+
+                if (!Platforms.Any(p => game.Platforms.Any(dbp => p.FallbackText == dbp.Name)))
+                {
+                    Platforms.AddRange(game.Platforms.Select(p => new ImageListItem
+                    {
+                        FallbackText = p.Name,
+                        ImageSource = p.Logo
+                    }));
                 }
             }
         }
@@ -220,18 +249,18 @@ namespace CorePlay.ViewModels
         private async Task LoadPlatformsFromDatabaseAsync()
         {
             var platforms = await _database.Platforms.Query().OrderBy(g => g.Name).ToListAsync();
+            var platformsHashSet = new HashSet<ImageListItem>();
 
             foreach (var platform in platforms)
             {
-                if (!Platforms.Any(p => p.FallbackText == platform.Name))
+                platformsHashSet.Add(new ImageListItem
                 {
-                    Platforms.Add(new ImageListItem
-                    {
-                        FallbackText = platform.Name,
-                        ImageSource = platform.Logo,
-                    });
-                }
+                    FallbackText = platform.Name,
+                    ImageSource = platform.Logo,
+                });
             }
+
+            Platforms.AddRange(platformsHashSet);
         }
     }
 }

@@ -46,7 +46,7 @@ namespace CorePlay.Plugins.Metadata.IGDB
             try
             {
                 _logger.LogInformation("Fetching Game Metadata...");
-                var games = await _client.QueryAsync<IGDBModels.Game>(IGDBClient.Endpoints.Games, $"fields id,name,summary,cover.image_id,artworks.image_id,videos.video_id; where name = \"{name}\";");
+                var games = await _client.QueryAsync<IGDBModels.Game>(IGDBClient.Endpoints.Games, $"fields id,name,summary,cover.image_id,artworks.image_id,videos.video_id,platforms.name; where name = \"{name}\";");
 
                 if (games == null)
                 {
@@ -75,7 +75,7 @@ namespace CorePlay.Plugins.Metadata.IGDB
             try
             {
                 _logger.LogInformation("Fetching Game Metadata...");
-                var games = await _client.QueryAsync<IGDBModels.Game>(IGDBClient.Endpoints.Games, $"fields id,name,summary,cover.image_id,artworks.image_id,videos.video_id; where name = \"{name}\";");
+                var games = await _client.QueryAsync<IGDBModels.Game>(IGDBClient.Endpoints.Games, $"fields id,name,summary,cover.image_id,artworks.image_id,videos.video_id,platforms.name; where name = \"{name}\";");
 
                 if (games == null)
                 {
@@ -109,7 +109,7 @@ namespace CorePlay.Plugins.Metadata.IGDB
                 Description = game.Summary?.ToString() ?? string.Empty,
                 Cover = game.Cover?.Value != null ? $"https:{ImageHelper.GetImageUrl(imageId: game.Cover.Value.ImageId, ImageSize.CoverBig, retina: true)}" : null,
                 Videos = game.Videos?.Values != null ? game.Videos.Values.Select(v => $"https://www.youtube.com/watch?v={v.VideoId}").ToList() : [],
-                Platforms = game.Platforms.Values.Select(p => (MetadataProperty)new MetadataNameProperty(p.Name)).ToHashSet(),
+                Platforms = game.Platforms?.Values.Select(p => (MetadataProperty)new MetadataNameProperty(p.Name)).ToHashSet(),
             };
         }
 
