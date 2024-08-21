@@ -1,6 +1,6 @@
 ﻿using CorePlay.SDK.Models;
 
-namespace CorePlay.SDK.Interfaces.Providers
+namespace CorePlay.SDK.Providers
 {
     public interface IMetadataProvider
     {

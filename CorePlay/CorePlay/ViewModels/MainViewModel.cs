@@ -1,7 +1,7 @@
 ﻿using CorePlay.Helpers;
 using CorePlay.Models;
 using CorePlay.SDK.Database;
-using CorePlay.SDK.Interfaces.Providers;
+using CorePlay.SDK.Providers;
 using CorePlay.SDK.Models;
 using DynamicData;
 using System;
@@ -31,13 +31,12 @@ namespace CorePlay.ViewModels
             _database = database ?? throw new ArgumentNullException(nameof(database));
             _libraryProviders = libraryProviders ?? throw new ArgumentNullException(nameof(libraryProviders));
             _metadataProviders = metadataProviders ?? throw new ArgumentNullException(nameof(metadataProviders));
-            LoadPlatformsAsync(CancellationToken.None).ConfigureAwait(false);
-            LoadGamesAsync(CancellationToken.None).ConfigureAwait(false);
+            LoadGamesFromDatabaseAsync().ConfigureAwait(false);
         }
 
         private async Task LoadPlatformsAsync(CancellationToken cancellationToken)
         {
-            //await LoadPlatformsFromDatabaseAsync();
+            await LoadPlatformsFromDatabaseAsync();
 
             string directoryPath = @"../../deploy/Assets/Platforms/Light - Color"; // Change this to your target directory path
 
@@ -98,7 +97,7 @@ namespace CorePlay.ViewModels
             {
                 var games = await libraryProvider.GetGamesAsync();
                 var platforms = await _database.Platforms.Query().OrderBy(p => p.Name).ToListAsync();
-                var platformsHashSet = new HashSet<ImageListItem>();
+                var platformsHashSet = new List<ImageListItem>();
 
                 foreach (var game in games)
                 {
@@ -173,7 +172,7 @@ namespace CorePlay.ViewModels
                     }
                 }
 
-                Platforms.AddRange(platformsHashSet);
+                Platforms.AddRange(platformsHashSet.Where(d => !platformsHashSet.Any(p => p.FallbackText == d.FallbackText)).DistinctBy(k => k.FallbackText));
             }
             catch (Exception ex)
             {
@@ -183,28 +182,27 @@ namespace CorePlay.ViewModels
 
         private async Task LoadGamesFromDatabaseAsync()
         {
-            var games = await _database.Games.Include(x => x.Platforms).Query().OrderBy(g => g.Name).ToListAsync();
+            var games = await _database.Games
+                .Include(x => x.Platforms)
+                .Query()
+                .OrderBy(g => g.Name)
+                .ToListAsync();
 
-            foreach (var game in games)
-            {
-                if (!Items.Any(p => p.FallbackText == game?.Name))
+            Items.AddRange(games
+                .Select(x => new ImageListItem
                 {
-                    Items.Add(new ImageListItem
-                    {
-                        FallbackText = game.Name,
-                        ImageSource = game.Cover,
-                    });
-                }
+                    FallbackText = x.Name,
+                    ImageSource = x.Cover
+                }));
 
-                if (!Platforms.Any(p => game.Platforms.Any(dbp => p.FallbackText == dbp.Name)))
+            Platforms.AddRange(games
+                .SelectMany(x => x.Platforms)
+                .DistinctBy(x => x.Id)
+                .Select(p => new ImageListItem
                 {
-                    Platforms.AddRange(game.Platforms.Select(p => new ImageListItem
-                    {
-                        FallbackText = p.Name,
-                        ImageSource = p.Logo
-                    }));
-                }
-            }
+                    FallbackText = p.Name,
+                    ImageSource = p.Logo
+                }));
         }
 
         private async Task LoadPlatformsFromProviderAsync(IMetadataProvider metadataProvider, CancellationToken cancellationToken)
@@ -249,7 +247,7 @@ namespace CorePlay.ViewModels
         private async Task LoadPlatformsFromDatabaseAsync()
         {
             var platforms = await _database.Platforms.Query().OrderBy(g => g.Name).ToListAsync();
-            var platformsHashSet = new HashSet<ImageListItem>();
+            var platformsHashSet = new List<ImageListItem>();
 
             foreach (var platform in platforms)
             {
@@ -260,7 +258,7 @@ namespace CorePlay.ViewModels
                 });
             }
 
-            Platforms.AddRange(platformsHashSet);
+            Platforms.AddRange(platformsHashSet.Distinct());
         }
     }
 }

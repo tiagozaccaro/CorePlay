@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace CorePlay.SDK.Interfaces.Plugins
+namespace CorePlay.SDK.Plugins
 {
     public interface IPlugin
     {

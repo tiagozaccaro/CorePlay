@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             x:Class="CorePlay.Controls.OptionsDialog">
+    <Border BorderThickness="4"
+            CornerRadius="10"
+            Margin="4"
+            Background="#48484C"
+            Width="1000"
+            Height="800"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
+        <StackPanel HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+            <TabControl TabStripPlacement="Left" Margin="5">
+                <TabItem Header="Tab 1">
+                    <TextBlock Margin="5">This is tab 1 content</TextBlock>
+                </TabItem>
+                <TabItem Header="Tab 2">
+                    <TextBlock Margin="5">This is tab 2 content</TextBlock>
+                </TabItem>
+                <TabItem Header="Tab 3">
+                    <TextBlock Margin="5">This is tab 3 content</TextBlock>
+                </TabItem>
+            </TabControl>
+        </StackPanel>
+    </Border>
+</UserControl>
