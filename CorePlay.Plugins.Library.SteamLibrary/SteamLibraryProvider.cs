@@ -1,6 +1,6 @@
 ﻿using CorePlay.SDK.Extensions;
-using CorePlay.SDK.Interfaces.Providers;
 using CorePlay.SDK.Models;
+using CorePlay.SDK.Providers;
 using Microsoft.Extensions.Logging;
 
 namespace CorePlay.Plugins.Library.SteamLibrary

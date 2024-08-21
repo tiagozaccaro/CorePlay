@@ -4,8 +4,8 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using CorePlay.SDK.Database;
-using CorePlay.SDK.Interfaces.Providers;
-using CorePlay.SDK.Plugins;
+using CorePlay.SDK.Providers;
+using CorePlay.SDK.Services;
 using CorePlay.ViewModels;
 using CorePlay.Views;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,21 +25,20 @@ namespace CorePlay
             var services = new ServiceCollection();
             // Register common services
             services.AddHttpClient();
-            services.AddSingleton<ILogger<PluginLoader>, Logger<PluginLoader>>();
-            services.AddSingleton<PluginLoader>();
-            services.AddSingleton<ILogger<PluginLoader>, Logger<PluginLoader>>();
+            services.AddSingleton<PluginLoaderService>();
+            services.AddSingleton<ILogger<PluginLoaderService>, Logger<PluginLoaderService>>();
             services.AddSingleton(provider =>
             {
                 var logger = provider.GetRequiredService<ILogger<CorePlayDatabaseContext>>();
-                return new CorePlayDatabaseContext("../../deploy/plugins/coreplay.db", logger);
+                return new CorePlayDatabaseContext("D:/Documents/CorePlay/deploy/plugins/coreplay.db", logger);
             });
 
             // Build initial service provider
             var serviceProvider = services.BuildServiceProvider();
 
             // Configure PluginLoader and load plugins
-            var pluginLoader = serviceProvider.GetRequiredService<PluginLoader>();
-            pluginLoader.LoadPlugins("../../deploy/plugins", services);
+            var pluginLoader = serviceProvider.GetRequiredService<PluginLoaderService>();
+            pluginLoader.LoadPlugins("D:/Documents/CorePlay/deploy/plugins", services);
 
             // Build the final service provider
             serviceProvider = services.BuildServiceProvider();

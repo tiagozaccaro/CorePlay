@@ -38,7 +38,7 @@ namespace CorePlay.ViewModels
         {
             await LoadPlatformsFromDatabaseAsync();
 
-            string directoryPath = @"../../deploy/Assets/Platforms/Light - Color"; // Change this to your target directory path
+            string directoryPath = @"D:/Documents/CorePlay/deploy/plugins/Assets/Platforms/Light - Color"; // Change this to your target directory path
 
             try
             {

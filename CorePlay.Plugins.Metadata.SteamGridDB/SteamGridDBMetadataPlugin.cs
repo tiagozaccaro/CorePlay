@@ -1,5 +1,5 @@
-﻿using CorePlay.SDK.Interfaces.Plugins;
-using CorePlay.SDK.Interfaces.Providers;
+﻿using CorePlay.SDK.Plugins;
+using CorePlay.SDK.Providers;
 using craftersmine.SteamGridDBNet;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

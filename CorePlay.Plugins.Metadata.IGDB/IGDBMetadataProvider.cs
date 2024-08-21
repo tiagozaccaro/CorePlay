@@ -1,5 +1,5 @@
 ﻿using CorePlay.SDK.Extensions;
-using CorePlay.SDK.Interfaces.Providers;
+using CorePlay.SDK.Providers;
 using CorePlay.SDK.Models;
 using IGDB;
 using Microsoft.Extensions.Logging;

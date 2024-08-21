@@ -1,6 +1,6 @@
 ﻿using CorePlay.SDK.Extensions;
-using CorePlay.SDK.Interfaces.Providers;
 using CorePlay.SDK.Models;
+using CorePlay.SDK.Providers;
 using craftersmine.SteamGridDBNet;
 using Microsoft.Extensions.Logging;
 
