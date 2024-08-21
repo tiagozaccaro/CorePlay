@@ -1,7 +1,9 @@
 ﻿using CorePlay.SDK.Database;
 using CorePlay.SDK.Models;
 using CorePlay.SDK.Providers;
+using CorePlay.SDK.Services;
 using DynamicData;
+using SDL2;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,6 +19,7 @@ namespace CorePlay.ViewModels
         private readonly CorePlayDatabaseContext _database;
         private readonly IEnumerable<ILibraryProvider> _libraryProviders;
         private readonly IEnumerable<IMetadataProvider> _metadataProviders;
+        private readonly IGamepadService _gamepadService;
 
         public ObservableCollection<ImageGalleryItem> Items { get; } = [];
         public ObservableCollection<ImageGalleryItem> Platforms { get; } = [];
@@ -24,11 +27,12 @@ namespace CorePlay.ViewModels
         public MainViewModel() { }
 
         // Constructor for actual use
-        public MainViewModel(CorePlayDatabaseContext database, IEnumerable<ILibraryProvider> libraryProviders, IEnumerable<IMetadataProvider> metadataProviders)
+        public MainViewModel(CorePlayDatabaseContext database, IEnumerable<ILibraryProvider> libraryProviders, IEnumerable<IMetadataProvider> metadataProviders, IGamepadService gamepadService)
         {
             _database = database ?? throw new ArgumentNullException(nameof(database));
             _libraryProviders = libraryProviders ?? throw new ArgumentNullException(nameof(libraryProviders));
             _metadataProviders = metadataProviders ?? throw new ArgumentNullException(nameof(metadataProviders));
+            _gamepadService = gamepadService;
             LoadGamesFromDatabaseAsync().ConfigureAwait(false);
         }
 

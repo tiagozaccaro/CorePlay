@@ -6,6 +6,8 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.VisualTree;
 using CorePlay.SDK.Models;
+using CorePlay.SDK.Services;
+using SDL2;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 
@@ -13,6 +15,8 @@ namespace CorePlay.SDK.Controls
 {
     public class ImageGallery : TemplatedControl
     {
+        private readonly IGamepadService _gamepadService;
+
         public static readonly StyledProperty<LayoutMode> LayoutModeProperty =
             AvaloniaProperty.Register<ImageGallery, LayoutMode>(nameof(LayoutMode), LayoutMode.Grid);
 
@@ -112,10 +116,44 @@ namespace CorePlay.SDK.Controls
         }
 
         public ImageGallery()
-        {
+        {            
+            //_gamepadService = gamepadService;
             Focusable = true;
             ItemsSourceProperty.Changed.Subscribe(OnItemsChanged);
             SubscribeToCollectionChanged(ItemsSource);
+
+            var moveUp = new GamepadAction("Move Up", () => NavigateImages(MoveUpKey));
+            var moveDown = new GamepadAction("Move Down", () => NavigateImages(MoveDownKey));
+            var moveLeft = new GamepadAction("Move Left", () => NavigateImages(MoveLeftKey));
+            var moveRight = new GamepadAction("Move Right", () => NavigateImages(MoveRightKey));
+
+            // Bind D-pad (digital) inputs
+            _gamepadService.BindAction(GamepadEventType.ButtonPressed,
+                [(int)SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_UP],
+                moveUp);
+            _gamepadService.BindAction(GamepadEventType.ButtonPressed,
+                [(int)SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_DOWN],
+                moveDown);
+            _gamepadService.BindAction(GamepadEventType.ButtonPressed,
+                [(int)SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_LEFT],
+                moveLeft);
+            _gamepadService.BindAction(GamepadEventType.ButtonPressed,
+                [(int)SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_RIGHT],
+                moveRight);
+
+            // Bind analog stick inputs
+            _gamepadService.BindAction(GamepadEventType.AxisMoved,
+                [(int)SDL.SDL_GameControllerAxis.SDL_CONTROLLER_AXIS_LEFTY],
+                moveUp); // Analog stick up
+            _gamepadService.BindAction(GamepadEventType.AxisMoved,
+                [(int)SDL.SDL_GameControllerAxis.SDL_CONTROLLER_AXIS_LEFTY],
+                moveDown); // Analog stick down
+            _gamepadService.BindAction(GamepadEventType.AxisMoved,
+                [(int)SDL.SDL_GameControllerAxis.SDL_CONTROLLER_AXIS_LEFTX],
+                moveLeft); // Analog stick left
+            _gamepadService.BindAction(GamepadEventType.AxisMoved,
+                [(int)SDL.SDL_GameControllerAxis.SDL_CONTROLLER_AXIS_LEFTX],
+                moveRight); // Analog stick right
         }
 
         private void OnItemsChanged(AvaloniaPropertyChangedEventArgs<ObservableCollection<ImageGalleryItem>> e)
@@ -160,18 +198,7 @@ namespace CorePlay.SDK.Controls
 
             if (key == MoveLeftKey || key == MoveRightKey || key == MoveUpKey || key == MoveDownKey)
             {
-                if (SelectedItem == null)
-                {
-                    if (ItemsSource != null && ItemsSource.Any())
-                    {
-                        SelectedItem = ItemsSource.First();
-                    }
-                }
-                else
-                {
-                    NavigateImages(key);
-                }
-
+                NavigateImages(key);
                 e.Handled = true;
             }
         }
@@ -189,10 +216,10 @@ namespace CorePlay.SDK.Controls
 
             var currentIndex = items.IndexOf(SelectedItem);
             if (currentIndex == -1) return;
-
-            int newIndex = -1;
             int columns = GetNumberOfColumns();
 
+
+            int newIndex;
             if (LayoutMode == LayoutMode.Grid)
             {
                 newIndex = NavigateGridLayout(key, currentIndex, items, columns);
