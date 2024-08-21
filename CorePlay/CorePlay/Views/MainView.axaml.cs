@@ -13,7 +13,6 @@ namespace CorePlay.Views
         private void ToggleDialog()
         {
             Overlay.IsVisible = !Overlay.IsVisible;
-            Dialog.IsVisible = !Dialog.IsVisible;
         }
 
         private void Options_Click(object sender, RoutedEventArgs e)

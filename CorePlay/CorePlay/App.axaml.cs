@@ -1,7 +1,5 @@
-using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using CorePlay.SDK.Database;
 using CorePlay.SDK.Providers;
@@ -44,14 +42,14 @@ namespace CorePlay
             serviceProvider = services.BuildServiceProvider();
 
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            {
+            {                
                 desktop.MainWindow = new MainWindow
                 {
                     DataContext = new MainViewModel(serviceProvider.GetService<CorePlayDatabaseContext>(), serviceProvider.GetServices<ILibraryProvider>(), serviceProvider.GetServices<IMetadataProvider>())
                 };
             }
             else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
-            {
+            {                
                 singleViewPlatform.MainView = new MainView
                 {
                     DataContext = new MainViewModel(serviceProvider.GetService<CorePlayDatabaseContext>(), serviceProvider.GetServices<ILibraryProvider>(), serviceProvider.GetServices<IMetadataProvider>())

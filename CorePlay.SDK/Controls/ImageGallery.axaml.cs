@@ -5,47 +5,43 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.VisualTree;
-using CorePlay.Enums;
-using CorePlay.Models;
-using System;
-using System.Collections.Generic;
+using CorePlay.SDK.Models;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Linq;
 
-namespace CorePlay.Controls
+namespace CorePlay.SDK.Controls
 {
-    public class ImageGrid : TemplatedControl
+    public class ImageGallery : TemplatedControl
     {
         public static readonly StyledProperty<LayoutMode> LayoutModeProperty =
-            AvaloniaProperty.Register<ImageGrid, LayoutMode>(nameof(LayoutMode), LayoutMode.Grid);
+            AvaloniaProperty.Register<ImageGallery, LayoutMode>(nameof(LayoutMode), LayoutMode.Grid);
 
         public static readonly StyledProperty<Orientation> OrientationProperty =
-            AvaloniaProperty.Register<ImageGrid, Orientation>(nameof(Orientation), Orientation.Horizontal);
+            AvaloniaProperty.Register<ImageGallery, Orientation>(nameof(Orientation), Orientation.Horizontal);
 
-        public static readonly StyledProperty<ObservableCollection<ImageListItem>> ItemsSourceProperty =
-            AvaloniaProperty.Register<ImageGrid, ObservableCollection<ImageListItem>>(nameof(ItemsSource), []);
+        public static readonly StyledProperty<ObservableCollection<ImageGalleryItem>> ItemsSourceProperty =
+            AvaloniaProperty.Register<ImageGallery, ObservableCollection<ImageGalleryItem>>(nameof(ItemsSource), []);
 
-        public static readonly StyledProperty<ImageListItem> SelectedItemProperty =
-            AvaloniaProperty.Register<ImageGrid, ImageListItem>(nameof(SelectedItem));
+        public static readonly StyledProperty<ImageGalleryItem> SelectedItemProperty =
+            AvaloniaProperty.Register<ImageGallery, ImageGalleryItem>(nameof(SelectedItem));
 
         public static readonly StyledProperty<Size> ImageSizeProperty =
-            AvaloniaProperty.Register<ImageGrid, Size>(nameof(ImageSize), new Size(100, 100));
+            AvaloniaProperty.Register<ImageGallery, Size>(nameof(ImageSize), new Size(100, 100));
 
         public static readonly StyledProperty<Key> MoveLeftKeyProperty =
-            AvaloniaProperty.Register<ImageGrid, Key>(nameof(MoveLeftKey), Key.Left);
+            AvaloniaProperty.Register<ImageGallery, Key>(nameof(MoveLeftKey), Key.Left);
 
         public static readonly StyledProperty<Key> MoveRightKeyProperty =
-            AvaloniaProperty.Register<ImageGrid, Key>(nameof(MoveRightKey), Key.Right);
+            AvaloniaProperty.Register<ImageGallery, Key>(nameof(MoveRightKey), Key.Right);
 
         public static readonly StyledProperty<Key> MoveUpKeyProperty =
-            AvaloniaProperty.Register<ImageGrid, Key>(nameof(MoveUpKey), Key.Up);
+            AvaloniaProperty.Register<ImageGallery, Key>(nameof(MoveUpKey), Key.Up);
 
         public static readonly StyledProperty<Key> MoveDownKeyProperty =
-            AvaloniaProperty.Register<ImageGrid, Key>(nameof(MoveDownKey), Key.Down);
+            AvaloniaProperty.Register<ImageGallery, Key>(nameof(MoveDownKey), Key.Down);
 
         public static readonly StyledProperty<Stretch> StretchProperty =
-                AvaloniaProperty.Register<ImageGrid, Stretch>(nameof(Stretch), Stretch.Uniform);
+                AvaloniaProperty.Register<ImageGallery, Stretch>(nameof(Stretch), Stretch.Uniform);
 
         public Stretch Stretch
         {
@@ -89,13 +85,13 @@ namespace CorePlay.Controls
             set => SetValue(OrientationProperty, value);
         }
 
-        public ObservableCollection<ImageListItem> ItemsSource
+        public ObservableCollection<ImageGalleryItem> ItemsSource
         {
             get => GetValue(ItemsSourceProperty);
             set => SetValue(ItemsSourceProperty, value);
         }
 
-        public ImageListItem SelectedItem
+        public ImageGalleryItem SelectedItem
         {
             get => GetValue(SelectedItemProperty);
             set => SetValue(SelectedItemProperty, value);
@@ -115,20 +111,20 @@ namespace CorePlay.Controls
             }
         }
 
-        public ImageGrid()
+        public ImageGallery()
         {
             Focusable = true;
             ItemsSourceProperty.Changed.Subscribe(OnItemsChanged);
             SubscribeToCollectionChanged(ItemsSource);
         }
 
-        private void OnItemsChanged(AvaloniaPropertyChangedEventArgs<ObservableCollection<ImageListItem>> e)
+        private void OnItemsChanged(AvaloniaPropertyChangedEventArgs<ObservableCollection<ImageGalleryItem>> e)
         {
             SubscribeToCollectionChanged(e.NewValue.Value);
             UpdateSelectedItemOnItemsChange();
         }
 
-        private void SubscribeToCollectionChanged(ObservableCollection<ImageListItem> collection)
+        private void SubscribeToCollectionChanged(ObservableCollection<ImageGalleryItem> collection)
         {
             if (collection != null)
             {
@@ -212,7 +208,7 @@ namespace CorePlay.Controls
             }
         }
 
-        private static int NavigateGridLayout(Key key, int currentIndex, List<ImageListItem> items, int columns)
+        private static int NavigateGridLayout(Key key, int currentIndex, List<ImageGalleryItem> items, int columns)
         {
             int newIndex = currentIndex;
 
@@ -235,7 +231,7 @@ namespace CorePlay.Controls
             return newIndex;
         }
 
-        private int NavigateListLayout(Key key, int currentIndex, List<ImageListItem> items)
+        private int NavigateListLayout(Key key, int currentIndex, List<ImageGalleryItem> items)
         {
             int newIndex = currentIndex;
 
@@ -295,14 +291,14 @@ namespace CorePlay.Controls
 
             if (itemCount / columns == 0)
             {
-                previousRow = currentRow - 1 + (itemCount / columns);
+                previousRow = currentRow - 1 + itemCount / columns;
             }
             else
             {
-                previousRow = (currentRow - 1 + (itemCount / columns)) % (itemCount / columns);
+                previousRow = (currentRow - 1 + itemCount / columns) % (itemCount / columns);
             }
 
-            return previousRow * columns + (currentIndex % columns);
+            return previousRow * columns + currentIndex % columns;
         }
 
         private static int GetNextRowIndex(int currentIndex, int itemCount, int columns)
@@ -310,8 +306,8 @@ namespace CorePlay.Controls
             int rows = (itemCount + columns - 1) / columns;
             int currentRow = currentIndex / columns;
             int nextRow = (currentRow + 1) % rows;
-            int newIndex = nextRow * columns + (currentIndex % columns);
-            return newIndex < itemCount ? newIndex : (nextRow * columns + (currentIndex % columns));
+            int newIndex = nextRow * columns + currentIndex % columns;
+            return newIndex < itemCount ? newIndex : nextRow * columns + currentIndex % columns;
         }
 
         protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
@@ -319,7 +315,7 @@ namespace CorePlay.Controls
             base.OnAttachedToVisualTree(e);
 
             // Request focus when the control is added to the visual tree
-            this.Focus();
+            Focus();
         }
 
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)

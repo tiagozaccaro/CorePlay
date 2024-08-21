@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using System;
 
 namespace CorePlay.Views
 {
@@ -8,6 +9,7 @@ namespace CorePlay.Views
         public MainWindow()
         {
             InitializeComponent();
+         
             // Get the primary screen's bounds
             var screenBounds = Screens.Primary.Bounds;
 

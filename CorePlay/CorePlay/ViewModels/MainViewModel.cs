@@ -1,8 +1,6 @@
-﻿using CorePlay.Helpers;
-using CorePlay.Models;
-using CorePlay.SDK.Database;
-using CorePlay.SDK.Providers;
+﻿using CorePlay.SDK.Database;
 using CorePlay.SDK.Models;
+using CorePlay.SDK.Providers;
 using DynamicData;
 using System;
 using System.Collections.Generic;
@@ -20,8 +18,8 @@ namespace CorePlay.ViewModels
         private readonly IEnumerable<ILibraryProvider> _libraryProviders;
         private readonly IEnumerable<IMetadataProvider> _metadataProviders;
 
-        public ObservableCollection<ImageListItem> Items { get; } = [];
-        public ObservableCollection<ImageListItem> Platforms { get; } = [];
+        public ObservableCollection<ImageGalleryItem> Items { get; } = [];
+        public ObservableCollection<ImageGalleryItem> Platforms { get; } = [];
 
         public MainViewModel() { }
 
@@ -66,7 +64,7 @@ namespace CorePlay.ViewModels
 
                         // if (!Platforms.Any(p => p.FallbackText == fileNameWithoutExtension))
                         // {
-                        //     Platforms.Add(new ImageListItem
+                        //     Platforms.Add(new ImageGalleryItem
                         //     {
                         //         FallbackText = fileNameWithoutExtension,
                         //         ImageSource = fileName
@@ -97,7 +95,7 @@ namespace CorePlay.ViewModels
             {
                 var games = await libraryProvider.GetGamesAsync();
                 var platforms = await _database.Platforms.Query().OrderBy(p => p.Name).ToListAsync();
-                var platformsHashSet = new List<ImageListItem>();
+                var platformsHashSet = new List<ImageGalleryItem>();
 
                 foreach (var game in games)
                 {
@@ -155,7 +153,7 @@ namespace CorePlay.ViewModels
 
                     if (!Items.Any(p => p.FallbackText == game?.Name))
                     {
-                        Items.Add(new ImageListItem
+                        Items.Add(new ImageGalleryItem
                         {
                             FallbackText = dbGame.Name,
                             ImageSource = dbGame.Cover
@@ -164,7 +162,7 @@ namespace CorePlay.ViewModels
 
                     foreach (var platform in dbGame.Platforms)
                     {
-                        platformsHashSet.Add(new ImageListItem
+                        platformsHashSet.Add(new ImageGalleryItem
                         {
                             FallbackText = platform.Name,
                             ImageSource = platform.Logo
@@ -189,7 +187,7 @@ namespace CorePlay.ViewModels
                 .ToListAsync();
 
             Items.AddRange(games
-                .Select(x => new ImageListItem
+                .Select(x => new ImageGalleryItem
                 {
                     FallbackText = x.Name,
                     ImageSource = x.Cover
@@ -198,7 +196,7 @@ namespace CorePlay.ViewModels
             Platforms.AddRange(games
                 .SelectMany(x => x.Platforms)
                 .DistinctBy(x => x.Id)
-                .Select(p => new ImageListItem
+                .Select(p => new ImageGalleryItem
                 {
                     FallbackText = p.Name,
                     ImageSource = p.Logo
@@ -230,7 +228,7 @@ namespace CorePlay.ViewModels
 
                     if (!Platforms.Any(p => p.FallbackText == platform?.Name))
                     {
-                        Platforms.Add(new ImageListItem
+                        Platforms.Add(new ImageGalleryItem
                         {
                             FallbackText = dbPlatform.Name,
                             ImageSource = dbPlatform.Logo
@@ -247,11 +245,11 @@ namespace CorePlay.ViewModels
         private async Task LoadPlatformsFromDatabaseAsync()
         {
             var platforms = await _database.Platforms.Query().OrderBy(g => g.Name).ToListAsync();
-            var platformsHashSet = new List<ImageListItem>();
+            var platformsHashSet = new List<ImageGalleryItem>();
 
             foreach (var platform in platforms)
             {
-                platformsHashSet.Add(new ImageListItem
+                platformsHashSet.Add(new ImageGalleryItem
                 {
                     FallbackText = platform.Name,
                     ImageSource = platform.Logo,

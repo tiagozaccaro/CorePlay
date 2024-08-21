@@ -1,5 +1,3 @@
-using System;
-
 namespace CorePlay.Plugins.Metadata.ScreenScraper;
 
 // Model for game information

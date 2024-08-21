@@ -1,11 +1,7 @@
 ﻿using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using System;
-using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
 
-namespace CorePlay.Helpers
+namespace CorePlay.SDK.Helpers
 {
     public static class ImageHelper
     {

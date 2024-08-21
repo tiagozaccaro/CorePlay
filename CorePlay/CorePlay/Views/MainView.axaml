@@ -3,7 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:CorePlay.ViewModels"
-             xmlns:local="using:CorePlay.Controls"
+             xmlns:local="using:CorePlay.SDK.Controls"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
@@ -20,12 +20,12 @@
                 <RowDefinition Height="*" />
                 <RowDefinition Height="200" />
             </Grid.RowDefinitions>
-            <!-- ImageGrids -->
-            <local:ImageGrid Grid.Row="0"
+            <!-- ImageGallerys -->
+            <local:ImageGallery Grid.Row="0"
                              ItemsSource="{Binding Items}"
                              ImageSize="264,352"
                              Stretch="UniformToFill" />
-            <local:ImageGrid Grid.Row="1"
+            <local:ImageGallery Grid.Row="1"
                              ItemsSource="{Binding Platforms}"
                              ImageSize="160,160"
                              LayoutMode="List" />

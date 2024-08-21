@@ -1,8 +1,6 @@
-﻿using Avalonia.Media.Imaging;
-
-namespace CorePlay.Models
+﻿namespace CorePlay.SDK.Models
 {
-    public class ImageListItem
+    public class ImageGalleryItem
     {
         public string? ImageSource { get; set; }
         public string? FallbackText { get; set; }
