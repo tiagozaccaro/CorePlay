@@ -1,6 +1,6 @@
 using Avalonia.Data.Converters;
 using Avalonia.Media;
-using CorePlay.SDK.Models;
+using CorePlay.SDK.Models.Controls;
 using System.Globalization;
 
 namespace CorePlay.SDK.Converters

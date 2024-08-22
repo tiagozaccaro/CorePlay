@@ -1,8 +1,8 @@
-﻿namespace CorePlay.SDK.Models
+﻿namespace CorePlay.SDK.Models.Database
 {
-    public class GameMetadata
+    public class Game
     {
-        public string Id { get; set; } = string.Empty;
+        public string GameId { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public ulong Playtime { get; set; }
@@ -12,7 +12,7 @@
         public string? Logo { get; set; }
         public ICollection<string> Artworks { get; set; } = [];
         public ICollection<string> Videos { get; set; } = [];
-        public HashSet<MetadataProperty> Platforms { get; set; } = [];
-        public MetadataProperty? Source { get; set; }
+        public HashSet<Platform> Platforms { get; set; } = [];
+        public Source? Source { get; set; }
     }
 }

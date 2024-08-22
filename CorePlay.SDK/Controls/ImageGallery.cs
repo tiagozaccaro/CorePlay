@@ -4,8 +4,9 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
-using CorePlay.SDK.Models;
+using CorePlay.SDK.Models.Controls;
 using CorePlay.SDK.Services;
 using SDL2;
 using System.Collections.ObjectModel;
@@ -32,18 +33,6 @@ namespace CorePlay.SDK.Controls
         public static readonly StyledProperty<Size> ImageSizeProperty =
             AvaloniaProperty.Register<ImageGallery, Size>(nameof(ImageSize), new Size(100, 100));
 
-        public static readonly StyledProperty<Key> MoveLeftKeyProperty =
-            AvaloniaProperty.Register<ImageGallery, Key>(nameof(MoveLeftKey), Key.Left);
-
-        public static readonly StyledProperty<Key> MoveRightKeyProperty =
-            AvaloniaProperty.Register<ImageGallery, Key>(nameof(MoveRightKey), Key.Right);
-
-        public static readonly StyledProperty<Key> MoveUpKeyProperty =
-            AvaloniaProperty.Register<ImageGallery, Key>(nameof(MoveUpKey), Key.Up);
-
-        public static readonly StyledProperty<Key> MoveDownKeyProperty =
-            AvaloniaProperty.Register<ImageGallery, Key>(nameof(MoveDownKey), Key.Down);
-
         public static readonly StyledProperty<Stretch> StretchProperty =
                 AvaloniaProperty.Register<ImageGallery, Stretch>(nameof(Stretch), Stretch.Uniform);
 
@@ -51,30 +40,6 @@ namespace CorePlay.SDK.Controls
         {
             get => GetValue(StretchProperty);
             set => SetValue(StretchProperty, value);
-        }
-
-        public Key MoveLeftKey
-        {
-            get => GetValue(MoveLeftKeyProperty);
-            set => SetValue(MoveLeftKeyProperty, value);
-        }
-
-        public Key MoveRightKey
-        {
-            get => GetValue(MoveRightKeyProperty);
-            set => SetValue(MoveRightKeyProperty, value);
-        }
-
-        public Key MoveUpKey
-        {
-            get => GetValue(MoveUpKeyProperty);
-            set => SetValue(MoveUpKeyProperty, value);
-        }
-
-        public Key MoveDownKey
-        {
-            get => GetValue(MoveDownKeyProperty);
-            set => SetValue(MoveDownKeyProperty, value);
         }
 
         public LayoutMode LayoutMode
@@ -116,44 +81,11 @@ namespace CorePlay.SDK.Controls
         }
 
         public ImageGallery()
-        {            
+        {
             //_gamepadService = gamepadService;
             Focusable = true;
             ItemsSourceProperty.Changed.Subscribe(OnItemsChanged);
             SubscribeToCollectionChanged(ItemsSource);
-
-            var moveUp = new GamepadAction("Move Up", () => NavigateImages(MoveUpKey));
-            var moveDown = new GamepadAction("Move Down", () => NavigateImages(MoveDownKey));
-            var moveLeft = new GamepadAction("Move Left", () => NavigateImages(MoveLeftKey));
-            var moveRight = new GamepadAction("Move Right", () => NavigateImages(MoveRightKey));
-
-            // Bind D-pad (digital) inputs
-            _gamepadService.BindAction(GamepadEventType.ButtonPressed,
-                [(int)SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_UP],
-                moveUp);
-            _gamepadService.BindAction(GamepadEventType.ButtonPressed,
-                [(int)SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_DOWN],
-                moveDown);
-            _gamepadService.BindAction(GamepadEventType.ButtonPressed,
-                [(int)SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_LEFT],
-                moveLeft);
-            _gamepadService.BindAction(GamepadEventType.ButtonPressed,
-                [(int)SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_RIGHT],
-                moveRight);
-
-            // Bind analog stick inputs
-            _gamepadService.BindAction(GamepadEventType.AxisMoved,
-                [(int)SDL.SDL_GameControllerAxis.SDL_CONTROLLER_AXIS_LEFTY],
-                moveUp); // Analog stick up
-            _gamepadService.BindAction(GamepadEventType.AxisMoved,
-                [(int)SDL.SDL_GameControllerAxis.SDL_CONTROLLER_AXIS_LEFTY],
-                moveDown); // Analog stick down
-            _gamepadService.BindAction(GamepadEventType.AxisMoved,
-                [(int)SDL.SDL_GameControllerAxis.SDL_CONTROLLER_AXIS_LEFTX],
-                moveLeft); // Analog stick left
-            _gamepadService.BindAction(GamepadEventType.AxisMoved,
-                [(int)SDL.SDL_GameControllerAxis.SDL_CONTROLLER_AXIS_LEFTX],
-                moveRight); // Analog stick right
         }
 
         private void OnItemsChanged(AvaloniaPropertyChangedEventArgs<ObservableCollection<ImageGalleryItem>> e)
@@ -190,20 +122,7 @@ namespace CorePlay.SDK.Controls
             }
         }
 
-        protected override void OnKeyDown(KeyEventArgs e)
-        {
-            base.OnKeyDown(e);
-
-            Key key = e.Key;
-
-            if (key == MoveLeftKey || key == MoveRightKey || key == MoveUpKey || key == MoveDownKey)
-            {
-                NavigateImages(key);
-                e.Handled = true;
-            }
-        }
-
-        private void NavigateImages(Key key)
+        public void NavigateImages(NavigationDirection direction)
         {
             var items = ItemsSource?.ToList();
             if (items == null || items.Count == 0) return;
@@ -216,18 +135,10 @@ namespace CorePlay.SDK.Controls
 
             var currentIndex = items.IndexOf(SelectedItem);
             if (currentIndex == -1) return;
-            int columns = GetNumberOfColumns();
 
-
-            int newIndex;
-            if (LayoutMode == LayoutMode.Grid)
-            {
-                newIndex = NavigateGridLayout(key, currentIndex, items, columns);
-            }
-            else
-            {
-                newIndex = NavigateListLayout(key, currentIndex, items);
-            }
+            int newIndex = LayoutMode == LayoutMode.Grid
+                ? NavigateGridLayout(direction, currentIndex, items)
+                : NavigateListLayout(direction, currentIndex, items);
 
             if (newIndex >= 0 && newIndex < items.Count)
             {
@@ -235,59 +146,37 @@ namespace CorePlay.SDK.Controls
             }
         }
 
-        private static int NavigateGridLayout(Key key, int currentIndex, List<ImageGalleryItem> items, int columns)
+        private int NavigateGridLayout(NavigationDirection direction, int currentIndex, List<ImageGalleryItem> items)
         {
-            int newIndex = currentIndex;
-
-            switch (key)
+            int columns = GetNumberOfColumns();
+            return direction switch
             {
-                case Key.Left:
-                    newIndex = (currentIndex - 1 + items.Count) % items.Count;
-                    break;
-                case Key.Right:
-                    newIndex = (currentIndex + 1) % items.Count;
-                    break;
-                case Key.Up:
-                    newIndex = GetPreviousRowIndex(currentIndex, items.Count, columns);
-                    break;
-                case Key.Down:
-                    newIndex = GetNextRowIndex(currentIndex, items.Count, columns);
-                    break;
-            }
-
-            return newIndex;
+                NavigationDirection.Left => (currentIndex - 1 + items.Count) % items.Count,
+                NavigationDirection.Right => (currentIndex + 1) % items.Count,
+                NavigationDirection.Up => GetPreviousRowIndex(currentIndex, items.Count, columns),
+                NavigationDirection.Down => GetNextRowIndex(currentIndex, items.Count, columns),
+                _ => currentIndex
+            };
         }
 
-        private int NavigateListLayout(Key key, int currentIndex, List<ImageGalleryItem> items)
+        private int NavigateListLayout(NavigationDirection direction, int currentIndex, List<ImageGalleryItem> items)
         {
-            int newIndex = currentIndex;
-
-            if (Orientation == Orientation.Vertical)
+            return direction switch
             {
-                switch (key)
-                {
-                    case Key.Up:
-                        newIndex = (currentIndex - 1 + items.Count) % items.Count;
-                        break;
-                    case Key.Down:
-                        newIndex = (currentIndex + 1) % items.Count;
-                        break;
-                }
-            }
-            else
-            {
-                switch (key)
-                {
-                    case Key.Left:
-                        newIndex = (currentIndex - 1 + items.Count) % items.Count;
-                        break;
-                    case Key.Right:
-                        newIndex = (currentIndex + 1) % items.Count;
-                        break;
-                }
-            }
-
-            return newIndex;
+                NavigationDirection.Up => Orientation == Orientation.Vertical
+                    ? (currentIndex - 1 + items.Count) % items.Count
+                    : (currentIndex - 1 + items.Count) % items.Count,
+                NavigationDirection.Down => Orientation == Orientation.Vertical
+                    ? (currentIndex + 1) % items.Count
+                    : (currentIndex + 1) % items.Count,
+                NavigationDirection.Left => Orientation == Orientation.Horizontal
+                    ? (currentIndex - 1 + items.Count) % items.Count
+                    : (currentIndex - 1 + items.Count) % items.Count,
+                NavigationDirection.Right => Orientation == Orientation.Horizontal
+                    ? (currentIndex + 1) % items.Count
+                    : (currentIndex + 1) % items.Count,
+                _ => currentIndex
+            };
         }
 
         private int GetNumberOfColumns()
@@ -342,7 +231,7 @@ namespace CorePlay.SDK.Controls
             base.OnAttachedToVisualTree(e);
 
             // Request focus when the control is added to the visual tree
-            Focus();
+            Dispatcher.UIThread.Post(() => Focus(), DispatcherPriority.Background);
         }
 
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)

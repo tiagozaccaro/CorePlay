@@ -1,4 +1,4 @@
-﻿namespace CorePlay.SDK.Models
+﻿namespace CorePlay.SDK.Models.Database
 {
     public class Source
     {

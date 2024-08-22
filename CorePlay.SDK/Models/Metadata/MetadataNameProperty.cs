@@ -1,4 +1,4 @@
-﻿namespace CorePlay.SDK.Models
+﻿namespace CorePlay.SDK.Models.Metadata
 {
     /// <summary>
     /// Represents metadata property referencing data by name.

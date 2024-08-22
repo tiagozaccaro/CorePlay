@@ -1,27 +1,27 @@
-﻿namespace CorePlay.SDK.Models
+﻿namespace CorePlay.SDK.Models.Metadata
 {
     /// <summary>
-    /// Represents metadata property referencing specification object by id.
+    /// Represents metadata property referencing database object by ID.
     /// </summary>
-    public class MetadataSpecProperty : MetadataProperty, IEquatable<MetadataSpecProperty>
+    public class MetadataIdProperty : MetadataProperty
     {
         /// <summary>
-        /// Gets specification id.
+        /// Gets ID of referenced object.
         /// </summary>
-        public string Id { get; }
+        public Guid Id { get; }
 
         /// <summary>
-        /// Creates new instance of <see cref="MetadataSpecProperty"/>.
+        /// Creates new instance of <see cref="MetadataIdProperty"/>.
         /// </summary>
-        /// <param name="specId"></param>
-        public MetadataSpecProperty(string specId)
+        /// <param name="dbId"></param>
+        public MetadataIdProperty(Guid dbId)
         {
-            if (string.IsNullOrWhiteSpace(specId))
+            if (dbId == Guid.Empty)
             {
-                throw new ArgumentNullException(nameof(specId));
+                throw new ArgumentNullException(nameof(dbId));
             }
 
-            Id = specId;
+            Id = dbId;
         }
 
         /// <summary>
@@ -30,13 +30,13 @@
         /// <returns></returns>
         public override string ToString()
         {
-            return Id;
+            return Id.ToString();
         }
 
         /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            return Equals(obj as MetadataSpecProperty);
+            return Equals(obj as MetadataIdProperty);
         }
 
         /// <inheritdoc/>
@@ -46,7 +46,7 @@
         }
 
         /// <inheritdoc/>
-        public bool Equals(MetadataSpecProperty other)
+        public bool Equals(MetadataIdProperty other)
         {
             if (other == null)
             {

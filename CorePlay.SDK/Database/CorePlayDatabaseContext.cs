@@ -1,4 +1,4 @@
-﻿using CorePlay.SDK.Models;
+﻿using CorePlay.SDK.Models.Database;
 using LiteDB;
 using LiteDB.Async;
 using Microsoft.Extensions.Logging;

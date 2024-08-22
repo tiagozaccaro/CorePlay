@@ -1,4 +1,4 @@
-using CorePlay.SDK.Models;
+using CorePlay.SDK.Models.Database;
 
 namespace CorePlay.SDK.Services;
 

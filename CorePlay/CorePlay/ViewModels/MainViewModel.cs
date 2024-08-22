@@ -1,5 +1,8 @@
-﻿using CorePlay.SDK.Database;
-using CorePlay.SDK.Models;
+﻿using Avalonia.Input;
+using CorePlay.SDK.Database;
+using CorePlay.SDK.Models.Controls;
+using CorePlay.SDK.Models.Database;
+using CorePlay.SDK.Models.Metadata;
 using CorePlay.SDK.Providers;
 using CorePlay.SDK.Services;
 using DynamicData;
@@ -33,6 +36,7 @@ namespace CorePlay.ViewModels
             _libraryProviders = libraryProviders ?? throw new ArgumentNullException(nameof(libraryProviders));
             _metadataProviders = metadataProviders ?? throw new ArgumentNullException(nameof(metadataProviders));
             _gamepadService = gamepadService;
+
             LoadGamesFromDatabaseAsync().ConfigureAwait(false);
         }
 

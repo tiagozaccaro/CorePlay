@@ -1,5 +1,5 @@
 ﻿using CorePlay.SDK.Extensions;
-using CorePlay.SDK.Models;
+using CorePlay.SDK.Models.Metadata;
 using CorePlay.SDK.Providers;
 using Microsoft.Extensions.Logging;
 

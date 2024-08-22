@@ -21,11 +21,11 @@
                 <RowDefinition Height="200" />
             </Grid.RowDefinitions>
             <!-- ImageGallerys -->
-            <local:ImageGallery Grid.Row="0"
+            <local:ImageGallery x:Name="GamesGallery" Grid.Row="0"
                              ItemsSource="{Binding Items}"
                              ImageSize="264,352"
                              Stretch="UniformToFill" />
-            <local:ImageGallery Grid.Row="1"
+            <local:ImageGallery x:Name="PlatformsGallery" Grid.Row="1"
                              ItemsSource="{Binding Platforms}"
                              ImageSize="160,160"
                              LayoutMode="List" />
