@@ -1,5 +1,6 @@
 ﻿using Avalonia.Input;
 using CorePlay.SDK.Database;
+using CorePlay.SDK.Extensions;
 using CorePlay.SDK.Models.Controls;
 using CorePlay.SDK.Models.Database;
 using CorePlay.SDK.Models.Metadata;
@@ -37,63 +38,25 @@ namespace CorePlay.ViewModels
             _metadataProviders = metadataProviders ?? throw new ArgumentNullException(nameof(metadataProviders));
             _gamepadService = gamepadService;
 
-            LoadGamesFromDatabaseAsync().ConfigureAwait(false);
-        }
-
-        private async Task LoadPlatformsAsync(CancellationToken cancellationToken)
-        {
-            await LoadPlatformsFromDatabaseAsync();
-
-            string directoryPath = @"D:/Documents/CorePlay/deploy/plugins/Assets/Platforms/Light - Color"; // Change this to your target directory path
-
-            try
-            {
-                // Get all files in the directory and subdirectories
-                string[] files = Directory.GetFiles(directoryPath, "*.*", SearchOption.AllDirectories);
-
-                foreach (string fileName in files)
-                {
-                    var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName).Trim();
-
-                    var dbPlatform = await _database.Platforms.Query()
-                        .Where(g => g.Name == fileNameWithoutExtension).FirstOrDefaultAsync();
-
-                    if (dbPlatform == null && fileNameWithoutExtension.Length > 0)
-                    {
-                        dbPlatform = new Platform
-                        {
-                            Id = Guid.NewGuid(),
-                            Logo = fileName,
-                            Name = fileNameWithoutExtension,
-                        };
-
-                        await _database.Platforms.InsertAsync(dbPlatform);
-                        Console.WriteLine(dbPlatform.Name);
-
-                        // if (!Platforms.Any(p => p.FallbackText == fileNameWithoutExtension))
-                        // {
-                        //     Platforms.Add(new ImageGalleryItem
-                        //     {
-                        //         FallbackText = fileNameWithoutExtension,
-                        //         ImageSource = fileName
-                        //     });
-                        // }
-                    }
-
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
-            //var tasks = _metadataProviders.Select(metadata => LoadPlatformsFromProviderAsync(metadata, cancellationToken)).ToArray();
-            //await Task.WhenAll(tasks);
+            // Start the async tasks properly
+            _ = Task.Run(() => LoadGamesAsync(CancellationToken.None));
+            _ = Task.Run(() => LoadPlatformsAsync(CancellationToken.None));
         }
 
         private async Task LoadGamesAsync(CancellationToken cancellationToken)
         {
-            await LoadGamesFromDatabaseAsync();
+            await LoadGamesFromDatabaseAsync(cancellationToken);
             var tasks = _libraryProviders.Select(library => LoadGamesFromProviderAsync(library, cancellationToken)).ToArray();
+            await Task.WhenAll(tasks);
+        }
+
+        private async Task LoadPlatformsAsync(CancellationToken cancellationToken)
+        {
+            await LoadPlatformsFromDatabaseAsync(cancellationToken);
+
+            await LoadPlatformsFromDiskAsync(cancellationToken);
+
+            var tasks = _metadataProviders.Select(metadata => LoadPlatformsFromProviderAsync(metadata, cancellationToken)).ToArray();
             await Task.WhenAll(tasks);
         }
 
@@ -186,7 +149,7 @@ namespace CorePlay.ViewModels
             }
         }
 
-        private async Task LoadGamesFromDatabaseAsync()
+        private async Task LoadGamesFromDatabaseAsync(CancellationToken cancellationToken)
         {
             var games = await _database.Games
                 .Include(x => x.Platforms)
@@ -250,7 +213,53 @@ namespace CorePlay.ViewModels
             }
         }
 
-        private async Task LoadPlatformsFromDatabaseAsync()
+        private async Task LoadPlatformsFromDiskAsync(CancellationToken cancellationToken)
+        {
+            string directoryPath = $"{SDKExtensions.GetBaseDirectory()}/assets/platforms/light_color"; // Change this to your target directory path
+
+            try
+            {
+                // Get all files in the directory and subdirectories
+                string[] files = Directory.GetFiles(directoryPath, "*.*", SearchOption.AllDirectories);
+
+                foreach (string fileName in files)
+                {
+                    var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName).Trim();
+
+                    var dbPlatform = await _database.Platforms.Query()
+                        .Where(g => g.Name == fileNameWithoutExtension).FirstOrDefaultAsync();
+
+                    if (dbPlatform == null && fileNameWithoutExtension.Length > 0)
+                    {
+                        dbPlatform = new Platform
+                        {
+                            Id = Guid.NewGuid(),
+                            Logo = fileName,
+                            Name = fileNameWithoutExtension,
+                        };
+
+                        await _database.Platforms.InsertAsync(dbPlatform);
+                        Console.WriteLine(dbPlatform.Name);
+
+                        // if (!Platforms.Any(p => p.FallbackText == fileNameWithoutExtension))
+                        // {
+                        //     Platforms.Add(new ImageGalleryItem
+                        //     {
+                        //         FallbackText = fileNameWithoutExtension,
+                        //         ImageSource = fileName
+                        //     });
+                        // }
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+        }
+
+        private async Task LoadPlatformsFromDatabaseAsync(CancellationToken cancellationToken)
         {
             var platforms = await _database.Platforms.Query().OrderBy(g => g.Name).ToListAsync();
             var platformsHashSet = new List<ImageGalleryItem>();

@@ -86,6 +86,16 @@ namespace CorePlay.SDK.Controls
             Focusable = true;
             ItemsSourceProperty.Changed.Subscribe(OnItemsChanged);
             SubscribeToCollectionChanged(ItemsSource);
+
+            if (Design.IsDesignMode)
+            {
+                ItemsSource =
+                [
+                    new ImageGalleryItem { ImageSource = "https://example.com/image1.jpg", FallbackText = "Image 1" },
+                    new ImageGalleryItem { ImageSource = "https://example.com/image2.jpg", FallbackText = "Image 2" },
+                    new ImageGalleryItem { ImageSource = "https://example.com/image3.jpg", FallbackText = "Image 3" }
+                ];
+            }
         }
 
         private void OnItemsChanged(AvaloniaPropertyChangedEventArgs<ObservableCollection<ImageGalleryItem>> e)
@@ -94,15 +104,15 @@ namespace CorePlay.SDK.Controls
             UpdateSelectedItemOnItemsChange();
         }
 
-        private void SubscribeToCollectionChanged(ObservableCollection<ImageGalleryItem> collection)
+        private void SubscribeToCollectionChanged(ObservableCollection<ImageGalleryItem>? collection)
         {
             if (collection != null)
             {
-                collection.CollectionChanged += OnItemsCollectionChanged;
+                collection.CollectionChanged += OnItemsCollectionChanged!;
             }
         }
 
-        private void OnItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void OnItemsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             UpdateSelectedItemOnItemsChange();
         }
@@ -118,6 +128,17 @@ namespace CorePlay.SDK.Controls
                 if (SelectedItem == null || !ItemsSource.Contains(SelectedItem))
                 {
                     SelectedItem = ItemsSource.First();
+                }
+            }
+        }
+
+        private void OnItemPointerPressed(object sender, PointerPressedEventArgs e)
+        {
+            if (sender is Border border && border.DataContext is ImageGalleryItem item)
+            {
+                if (this is ImageGallery gallery)
+                {
+                    gallery.SelectedItem = item;
                 }
             }
         }

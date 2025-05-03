@@ -7,8 +7,23 @@ namespace CorePlay.SDK.Extensions
 {
     public static class SDKExtensions
     {
+        public static string GetSDKVersion()
+        {
+            return typeof(SDKExtensions).Assembly.GetName().Version?.ToString() ?? "Unknown";
+        }
+
+        public static string GetBaseDirectory()
+        {
+            //return AppContext.BaseDirectory;
+            return "C:\\Games\\CorePlay";
+        }
+
         public static void AddSDKServices(this IServiceCollection services)
-        {            
+        {
+            //create required directories
+            Directory.CreateDirectory(Path.Combine(GetBaseDirectory(), "data"));
+            Directory.CreateDirectory(Path.Combine(GetBaseDirectory(), "plugins"));
+
             // Register common services
             services.AddHttpClient();
             services.AddSingleton<PluginLoaderService>();
@@ -18,7 +33,7 @@ namespace CorePlay.SDK.Extensions
             services.AddSingleton(provider =>
             {
                 var logger = provider.GetRequiredService<ILogger<CorePlayDatabaseContext>>();
-                return new CorePlayDatabaseContext("D:/Documents/CorePlay/deploy/plugins/coreplay.db", logger);
+                return new CorePlayDatabaseContext($"{GetBaseDirectory()}/data/coreplay.db", logger);
             });
 
             // Build initial service provider
@@ -26,7 +41,7 @@ namespace CorePlay.SDK.Extensions
 
             // Configure PluginLoader and load plugins
             var pluginLoader = serviceProvider.GetRequiredService<PluginLoaderService>();
-            pluginLoader.LoadPlugins("D:/Documents/CorePlay/deploy/plugins", services);
+            pluginLoader.LoadPlugins($"{GetBaseDirectory()}/plugins", services);
         }
 
         public static void UseSDKServices(this IServiceProvider provider)

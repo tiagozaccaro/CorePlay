@@ -23,8 +23,8 @@ namespace CorePlay
         public override void OnFrameworkInitializationCompleted()
         {
             var collection = new ServiceCollection();
-            collection.AddSDKServices();
 
+            collection.AddSDKServices();
             collection.AddTransient<MainViewModel>();
 
             // Creates a ServiceProvider containing services from the provided IServiceCollection

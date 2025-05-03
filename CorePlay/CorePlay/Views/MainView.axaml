@@ -24,7 +24,9 @@
             <local:ImageGallery x:Name="GamesGallery" Grid.Row="0"
                              ItemsSource="{Binding Items}"
                              ImageSize="264,352"
-                             Stretch="UniformToFill" />
+                             Stretch="UniformToFill" 								
+                             LayoutMode="List" 
+								/>
             <local:ImageGallery x:Name="PlatformsGallery" Grid.Row="1"
                              ItemsSource="{Binding Platforms}"
                              ImageSize="160,160"
